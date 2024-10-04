@@ -1,38 +1,74 @@
 import 'package:flutter/material.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key, required this.appBartitle});
 
   final String appBartitle;
 
+  // 생성자에서 userID와 roomID를 받아서 처리
+  // final String userID;
+  // final String roomID;
+
   @override
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  List<Map<String, String>> messages = [
-    {"username": "게스트#8120", "message": "hi", "isMe": "false"},
-    {"username": "게스트#8120", "message": "hello", "isMe": "false"},
-    {"username": "게스트#5800", "message": "안녕", "isMe": "true"},
-    {"username": "게스트#5800", "message": "반가워", "isMe": "true"},
-  ];
+
+  IO.Socket? socket;
+  List<Map<String, String>> messages = [];
+  String roomId = "test_room"; // 방 ID 예시
 
   final TextEditingController _textEditingController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    _connectSocket();
+  }
+
+  void _connectSocket() {
+    // 소켓 초기화 및 서버에 연결
+    socket = IO.io('http://localhost:3001/chat', <String, dynamic> {
+      'transports': ['websocket'],
+      'autoConnect': false,
+    });
+
+    socket!.connect();
+
+    // 연결 확인
+    socket!.on('connect', (_) {
+      print('Connected to server');
+      socket!.emit('join', {'roomId': roomId, 'playerId': 'Guest1234'}); // 방에 참가
+    });
+
+    // 메시지 수신
+    socket!.on('msg', (data) {
+      setState(() {
+        Map<String, String> message = {};
+        data.forEach((key, value) {
+          message[key] = value;
+        });
+
+        messages.add(message);
+        _textEditingController.clear();
+      });
+    });
+
+    // 연결 해제 확인
+    socket!.on('disconnect', (_) => print('Disconnected'));
+  }
 
   void _sendMessage() {
     if (_textEditingController.text.isEmpty) {
       return;
     }
 
-    setState(() {
-      final Map<String, String> newMessage = {
-        "username": "게스트#5800",
-        "message": _textEditingController.text,
-        "isMe": "true"
-      };
-      messages.add(newMessage);
-      _textEditingController.clear();
-    });
+    final String message = _textEditingController.text;
+    socket!.emit('msg', {'roomId': roomId, 'msg': message, 'playerId': 'Guest1234'});
+
   }
 
   @override
@@ -63,9 +99,12 @@ class _ChatScreenState extends State<ChatScreen> {
                           itemCount: messages.length,
                           itemBuilder: (context, index) {
                               final message = messages[index];
-                              bool isMe = message['isMe'] == "true";
+                              bool isMe = message['playerId'] == "Guest1234";
+                              // bool isMe = message['isMe'] == "true";
                               return _buildMessage(
-                                  message["username"], message["message"], isMe);
+                                  message["playerId"], message["msg"], isMe);
+                              // return _buildMessage(
+                              //     message["username"], message["message"], isMe);
                           },
                       ),
                     )
@@ -151,4 +190,12 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    socket?.dispose();
+    _textEditingController.dispose();
+    super.dispose();
+  }
+
 }
