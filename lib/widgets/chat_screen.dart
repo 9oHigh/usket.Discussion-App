@@ -88,29 +88,31 @@ class _ChatScreenState extends State<ChatScreen> {
             ],
           ),
         ),
-        body: Column(
-            children: [
-                Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        FocusScope.of(context).unfocus();
-                      },
-                      child: ListView.builder(
-                          itemCount: messages.length,
-                          itemBuilder: (context, index) {
-                              final message = messages[index];
-                              bool isMe = message['playerId'] == "Guest1234";
-                              // bool isMe = message['isMe'] == "true";
-                              return _buildMessage(
-                                  message["playerId"], message["msg"], isMe);
-                              // return _buildMessage(
-                              //     message["username"], message["message"], isMe);
-                          },
-                      ),
-                    )
-                ),
-              _buildMessageInput()
-            ],
+        body: SafeArea(
+          child: Column(
+              children: [
+                  Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          FocusScope.of(context).unfocus();
+                        },
+                        child: ListView.builder(
+                            itemCount: messages.length,
+                            itemBuilder: (context, index) {
+                                final message = messages[index];
+                                bool isMe = message['playerId'] == "Guest1234";
+                                // bool isMe = message['isMe'] == "true";
+                                return _buildMessage(
+                                    message["playerId"], message["msg"], isMe);
+                                // return _buildMessage(
+                                //     message["username"], message["message"], isMe);
+                            },
+                        ),
+                      )
+                  ),
+                _buildMessageInput()
+              ],
+          ),
         )
     );
   }
