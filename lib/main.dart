@@ -1,4 +1,3 @@
-import 'package:app_team1/widgets/chat_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -32,7 +31,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const ChatScreen(appBartitle: "테스트"),
+      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
