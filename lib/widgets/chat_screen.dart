@@ -21,6 +21,7 @@ class _ChatScreenState extends State<ChatScreen> {
   String roomId = "test_room"; // 방 ID 예시
 
   final TextEditingController _textEditingController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -69,6 +70,14 @@ class _ChatScreenState extends State<ChatScreen> {
     final String message = _textEditingController.text;
     socket!.emit('msg', {'roomId': roomId, 'msg': message, 'playerId': 'Guest1234'});
 
+    _scrollToBottom();
+  }
+
+  void _scrollToBottom() {
+    _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 200),
+        curve: Curves.easeInOut);
   }
 
   @override
@@ -97,6 +106,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           FocusScope.of(context).unfocus();
                         },
                         child: ListView.builder(
+                            controller: _scrollController,
                             itemCount: messages.length,
                             itemBuilder: (context, index) {
                                 final message = messages[index];
