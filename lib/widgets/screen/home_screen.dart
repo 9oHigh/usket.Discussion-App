@@ -1,4 +1,6 @@
-import 'package:app_team1/model/room_list_model.dart';
+import 'package:app_team1/model/room.dart';
+import 'package:app_team1/model/topic.dart';
+import 'package:app_team1/services/api_service.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -9,43 +11,25 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<RoomListModel> roomList = [];
+  List<Room> roomList = [];
+  List<Topic> topicList = [];
+  ApiService apiService = ApiService();
 
   @override
   void initState() {
-    fetchRooms();
+    fetchRoomList();
+    fetchTopicList();
     super.initState();
   }
 
-  Future<void> fetchRooms() async {
-    setState(() {
-      roomList = [
-        RoomListModel(
-          topicName: "플러터",
-          roomName: "같이해요!",
-          startTime: DateTime.now(),
-          endTime: DateTime.now(),
-        ),
-        RoomListModel(
-          topicName: "플러터",
-          roomName: "같이해요!",
-          startTime: DateTime.now(),
-          endTime: DateTime.now(),
-        ),
-        RoomListModel(
-          topicName: "플러터",
-          roomName: "같이해요!",
-          startTime: DateTime.now(),
-          endTime: DateTime.now(),
-        ),
-        RoomListModel(
-          topicName: "플러터",
-          roomName: "같이해요!",
-          startTime: DateTime.now(),
-          endTime: DateTime.now(),
-        ),
-      ];
-    });
+  Future<void> fetchRoomList() async {
+    roomList = await apiService.getRoomList(100);
+    setState(() {});
+  }
+
+  Future<void> fetchTopicList() async {
+    topicList = await apiService.getTopicList();
+    setState(() {});
   }
 
   @override
@@ -70,7 +54,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("주제: ${roomList[index].topicName}"),
+                    Text(
+                        "주제: ${topicList.firstWhere((topic) => topic.id == roomList[index].topicId).name}"),
                     const SizedBox(
                       height: 4,
                     ),
