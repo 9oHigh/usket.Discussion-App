@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:app_team1/model/post_room.dart';
 import 'package:app_team1/model/room.dart';
 import 'package:app_team1/model/topic.dart';
 import 'package:http/http.dart' as http;
