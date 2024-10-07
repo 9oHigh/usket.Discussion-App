@@ -26,8 +26,8 @@ class ApiService {
     }
   }
 
-  Future<List<Room>> getRoomList(int limit,
-      {String? cursorId, int? topicId}) async {
+  Future<List<Room>> getRoomList(String? cursorId, int limit,
+      {int? topicId}) async {
     final response = await http.post(
       Uri.parse("$baseUrl${EndPoint.roomList.url}"),
       headers: <String, String>{

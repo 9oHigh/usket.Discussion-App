@@ -4,36 +4,49 @@ import 'package:app_team1/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
+import '../infinite_scroll_mixin.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<StatefulWidget> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with InfiniteScrollMixin<Room, HomeScreen> {
+  @override
   List<Room> roomList = [];
   List<Topic> topicList = [];
   ApiService apiService = ApiService();
   Timer? timer;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
-    fetchRoomList();
-    fetchTopicList();
     super.initState();
-    startTimer(); // 타이머 시작
+    initializeScrollController(_scrollController, fetchData); // 스크롤 컨트롤러 초기화
+    fetchRoomList(); // 초기 방 목록 로드
+    fetchTopicList();
+    startTimer();
   }
 
   @override
   void dispose() {
     timer?.cancel(); // 타이머 종료
+    _scrollController.dispose(); // 스크롤 컨트롤러 종료
     super.dispose();
   }
 
+  // fetchData 구현: 방 목록을 가져오는 비동기 함수
+  Future<List<Room>> fetchData() async {
+    print('fetchData 호출됨');
+    final response = await apiService.getRoomList(cursorId, 5); // topicId를 추가
+    return response;
+  }
+
   Future<void> fetchRoomList() async {
-    roomList = await apiService.getRoomList(100);
+    roomList = await apiService.getRoomList(cursorId, 5);
     setState(() {});
   }
 
@@ -43,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void startTimer() {
-    timer = Timer.periodic(const Duration(seconds: 30), (Timer t) {
+    timer = Timer.periodic(const Duration(minutes: 1), (Timer t) {
       checkExpiredRooms();
     });
   }
@@ -80,6 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Padding(
       padding: const EdgeInsets.all(8),
       child: ListView.builder(
+        controller: _scrollController,
         itemCount: roomList.length,
         itemBuilder: (context, index) {
           String topicName;
