@@ -32,7 +32,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _connectSocket() {
     // 소켓 초기화 및 서버에 연결
-    socket = IO.io('http://localhost:3001/chat', <String, dynamic> {
+    socket = IO.io('http://localhost:3000/chat', <String, dynamic> {
       'transports': ['websocket'],
       'autoConnect': false,
     });
