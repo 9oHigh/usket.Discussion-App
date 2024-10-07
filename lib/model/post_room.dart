@@ -1,16 +1,15 @@
-class RoomListModel {
-  String topicName;
+class PostRoom {
+  int topicId;
   String roomName;
+  int playerId;
   DateTime startTime;
   DateTime endTime;
-  bool isReserved = false;
 
-  RoomListModel({
-    required this.topicName,
+  PostRoom({
+    required this.topicId,
     required this.roomName,
+    required this.playerId,
     required this.startTime,
     required this.endTime,
   });
-
-  // MARK: - factory.fromMap
 }
