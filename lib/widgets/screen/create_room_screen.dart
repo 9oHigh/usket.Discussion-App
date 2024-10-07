@@ -137,10 +137,11 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
 
   // === 날짜 선택 메서드
   Future _selectDate(BuildContext context) async {
+    final DateTime now = DateTime.now(); // 현재 날짜 가져오기
     final DateTime? selected = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2024),
+      firstDate: now,
       lastDate: DateTime(2025),
     );
     if (selected != null) {
