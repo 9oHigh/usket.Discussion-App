@@ -2,6 +2,8 @@ import 'package:app_team1/model/room.dart';
 import 'package:app_team1/model/topic.dart';
 import 'package:app_team1/services/api_service.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,12 +16,20 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Room> roomList = [];
   List<Topic> topicList = [];
   ApiService apiService = ApiService();
+  Timer? timer;
 
   @override
   void initState() {
     fetchRoomList();
     fetchTopicList();
     super.initState();
+    startTimer(); // 타이머 시작
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel(); // 타이머 종료
+    super.dispose();
   }
 
   Future<void> fetchRoomList() async {
@@ -32,6 +42,39 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {});
   }
 
+  void startTimer() {
+    timer = Timer.periodic(const Duration(seconds: 30), (Timer t) {
+      checkExpiredRooms();
+    });
+  }
+
+  void checkExpiredRooms() {
+    final now = DateTime.now().toUtc();
+    print("현재 시간 (UTC): ${now.toIso8601String()}");
+
+    setState(() {
+      roomList.removeWhere((room) {
+        // endTime이 DateTime 객체인지 확인
+        DateTime endTimeUtc = room.endTime.toUtc();
+
+        bool isExpired = endTimeUtc.isBefore(now);
+
+        // 시간 차이 계산
+        Duration difference = now.difference(endTimeUtc);
+        print("시간 차이 (초): ${difference.inSeconds}");
+
+        if (isExpired) {
+          print("삭제되는 방: ${room.roomName}, 종료 시간: ${room.endTime}");
+        } else {
+          print(
+              "유지되는 방: ${room.roomName}, 종료까지 남은 시간: ${-difference.inMinutes} 분");
+        }
+
+        return isExpired;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -39,6 +82,18 @@ class _HomeScreenState extends State<HomeScreen> {
       child: ListView.builder(
         itemCount: roomList.length,
         itemBuilder: (context, index) {
+          String topicName;
+
+          try {
+            topicName = topicList
+                .firstWhere(
+                  (topic) => topic.id == roomList[index].topicId,
+                )
+                .name;
+          } catch (e) {
+            topicName = '주제 없음'; // 예외 발생 시 기본값 설정
+          }
+
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Container(
@@ -54,8 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                        "주제: ${topicList.firstWhere((topic) => topic.id == roomList[index].topicId).name}"),
+                    Text("주제: $topicName"),
                     const SizedBox(
                       height: 4,
                     ),
@@ -113,11 +167,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 4,
                       ),
                     },
-                    Text("시작: ${roomList[index].startTime.toIso8601String()}"),
+                    Text(
+                        "시작: ${DateFormat('yyyy-MM-dd HH:mm').format(roomList[index].startTime)}"),
                     const SizedBox(
                       height: 4,
                     ),
-                    Text("종료: ${roomList[index].endTime.toIso8601String()}"),
+                    Text(
+                        "종료: ${DateFormat('yyyy-MM-dd HH:mm').format(roomList[index].endTime)}"),
                     const SizedBox(
                       height: 4,
                     ),

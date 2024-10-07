@@ -1,8 +1,8 @@
-import 'package:app_team1/service/api_servide.dart';
+import '../../services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import '../../model/topic.dart';
+import 'package:go_router/go_router.dart';
 
 class CreateRoomScreen extends StatefulWidget {
   const CreateRoomScreen({super.key});
@@ -28,15 +28,20 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
       // 날짜와 시간 문자열을 DateTime 객체로 변환
       final dateTime =
           DateFormat('yyyy-MM-dd HH:mm').parse('$_selectedDate $_selectedTime');
-      final endDateTime = dateTime.add(const Duration(hours: 2)); // 2시간 후 종료
+
+      // UTC로 변환
+      final dateTimeUtc = dateTime.toUtc();
+
+      // 방 지속 시간 설정 3분
+      final endDateTimeUtc = dateTimeUtc.add(const Duration(minutes: 3));
 
       bool result = await _apiService.createRoom(_selectedTopicId!,
-          _roomNameController.text, 0, dateTime, endDateTime);
+          _roomNameController.text, 0, dateTimeUtc, endDateTimeUtc);
 
       if (result) {
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('방이 성공적으로 생성되었습니다!')));
-        // Navigator.pop(context); // 방 생성 후 이전 화면으로 돌아가기, 병합 후 주석 해제
+        // Navigator.pop(context); // 방 생성 후 이전 화면으로 돌아가기
       } else {
         setState(() {
           notifyText = "방 생성에 실패했습니다. 다시 시도해주세요.";
@@ -192,7 +197,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.pop(context);
+              context.go('/home');
             },
           ),
           actions: [
@@ -217,7 +222,9 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                     FocusManager.instance.primaryFocus?.unfocus(); // 포커스 해제
                   });
                   // 모든 조건이 충족되면 createRoom 메서드 호출
-                  createRoom();
+                  createRoom().then((_) {
+                    context.go('/home');
+                  });
                 }
               },
             ),
@@ -304,23 +311,4 @@ class TextButtonStyles {
       side: const BorderSide(color: Colors.grey, width: 1), // 테두리
     ),
   );
-}
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: CreateRoomScreen(),
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      supportedLocales: [
-        Locale('ko', ''),
-      ],
-    );
-  }
 }

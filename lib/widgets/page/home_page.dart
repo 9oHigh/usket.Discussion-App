@@ -1,6 +1,7 @@
 import 'package:app_team1/widgets/screen/favorite_screen.dart';
 import 'package:app_team1/widgets/screen/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -56,7 +57,7 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // context.go('/create_room')
+          context.go('/create_room');
         },
         child: const Icon(Icons.add),
       ),

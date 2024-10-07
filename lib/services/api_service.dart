@@ -78,7 +78,8 @@ class ApiService {
     }
   }
 
-  Future<bool> createRoom(PostRoom room) async {
+  Future<bool> createRoom(int topicId, String roomName, int playerId,
+      DateTime startTime, DateTime endTime) async {
     final response = await http.post(
       Uri.parse("$baseUrl${EndPoint.roomCreate.url}"),
       headers: <String, String>{
@@ -86,19 +87,21 @@ class ApiService {
       },
       body: jsonEncode(
         <String, dynamic>{
-          'topicId': room.topicId,
-          'roomName': room.roomName,
-          'playerId': room.playerId,
-          'startTime': room.startTime.toIso8601String(),
-          'endTime': room.endTime.toIso8601String(),
+          'topicId': topicId,
+          'roomName': roomName,
+          'playerId': playerId,
+          'startTime': startTime.toIso8601String(),
+          'endTime': endTime.toIso8601String(),
         },
       ),
     );
 
-    if (200 <= response.statusCode && response.statusCode < 299) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
       return true;
     } else {
+      print('${response.statusCode}, ${response.body}');
       return false;
     }
   }
+  
 }
