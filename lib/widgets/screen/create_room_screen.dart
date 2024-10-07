@@ -1,4 +1,4 @@
-import 'package:app_team1/service/api_servide.dart';
+import 'package:app_team1/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -304,23 +304,4 @@ class TextButtonStyles {
       side: const BorderSide(color: Colors.grey, width: 1), // 테두리
     ),
   );
-}
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: CreateRoomScreen(),
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      supportedLocales: [
-        Locale('ko', ''),
-      ],
-    );
-  }
 }
