@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../model/room.dart';
+import '../../model/room.dart';
 
 mixin InfiniteScrollMixin<T, W extends StatefulWidget> on State<W> {
   List<T> roomList = [];
