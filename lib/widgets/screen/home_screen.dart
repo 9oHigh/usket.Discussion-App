@@ -5,6 +5,7 @@ import 'package:app_team1/widgets/utils/infinite_scroll_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,7 +14,8 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with InfiniteScrollMixin<Room, HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with InfiniteScrollMixin<Room, HomeScreen> {
   List<Room> _roomList = [];
   List<Topic> _topicList = [];
   Timer? _timer;
@@ -25,9 +27,11 @@ class _HomeScreenState extends State<HomeScreen> with InfiniteScrollMixin<Room, 
   void initState() {
     super.initState();
     initializeScrollController(_scrollController, _fetchData);
-    _fetchRoomList();
-    _fetchTopicList();
-    _startTimer();
+    _fetchTopicList().then((_) {
+      _fetchRoomList().then((_) {
+        _loadReservations(); // 방 목록과 주제 목록이 로드된 후 호출
+      });
+    });
   }
 
   @override
@@ -37,6 +41,11 @@ class _HomeScreenState extends State<HomeScreen> with InfiniteScrollMixin<Room, 
     super.dispose();
   }
 
+  Future<void> _fetchTopicList() async {
+    _topicList = await _apiService.getTopicList();
+    setState(() {});
+  }
+
   Future<List<Room>> _fetchData() async {
     final response = await _apiService.getRoomList(cursorId, 5);
     return response;
@@ -44,11 +53,6 @@ class _HomeScreenState extends State<HomeScreen> with InfiniteScrollMixin<Room, 
 
   Future<void> _fetchRoomList() async {
     _roomList = await _apiService.getRoomList(cursorId, 5);
-    setState(() {});
-  }
-
-  Future<void> _fetchTopicList() async {
-    _topicList = await _apiService.getTopicList();
     setState(() {});
   }
 
@@ -67,6 +71,26 @@ class _HomeScreenState extends State<HomeScreen> with InfiniteScrollMixin<Room, 
         return isExpired;
       });
     });
+  }
+
+  void _updateReservation(int index) async {
+    setState(() {
+      _roomList[index].isReserved = !_roomList[index].isReserved;
+    });
+
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(
+        'room_${_roomList[index].roomId}', _roomList[index].isReserved);
+  }
+
+  // 예약 상태 불러오기
+  Future<void> _loadReservations() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    for (var room in _roomList) {
+      room.isReserved = prefs.getBool('room_${room.roomId}') ?? false;
+      print('방 "${room.roomName}" 예약 상태: ${room.isReserved}');
+    }
+    setState(() {});
   }
 
   @override
@@ -127,10 +151,7 @@ class _HomeScreenState extends State<HomeScreen> with InfiniteScrollMixin<Room, 
                             ),
                             ElevatedButton(
                               onPressed: () {
-                                setState(() {
-                                  _roomList[index].isReserved =
-                                      !_roomList[index].isReserved;
-                                });
+                                _updateReservation(index);
                               },
                               child: const Text('취소'),
                             ),
@@ -145,10 +166,7 @@ class _HomeScreenState extends State<HomeScreen> with InfiniteScrollMixin<Room, 
                         alignment: Alignment.centerRight,
                         child: ElevatedButton(
                           onPressed: () {
-                            setState(() {
-                              _roomList[index].isReserved =
-                                  !_roomList[index].isReserved;
-                            });
+                            _updateReservation(index);
                           },
                           child: const Text('예약'),
                         ),
