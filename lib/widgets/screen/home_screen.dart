@@ -170,7 +170,12 @@ class _HomeScreenState extends State<HomeScreen> with InfiniteScrollMixin<Room, 
               ),
             ),
           );
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final isCreated = await context.push('/create_room');
+          if (isCreated == true) _fetchRoomList(isReload: true);
         },
+        child: const Icon(Icons.add),
       ),
     );
   }

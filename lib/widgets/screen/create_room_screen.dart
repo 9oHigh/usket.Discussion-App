@@ -206,7 +206,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                     FocusManager.instance.primaryFocus?.unfocus();
                   });
                   _createRoom().then((_) {
-                    context.pop();
+                    context.pop(true);
                   });
                 }
               },
