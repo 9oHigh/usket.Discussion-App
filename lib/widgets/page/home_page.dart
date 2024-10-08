@@ -55,12 +55,6 @@ class _HomePageState extends State<HomePage> {
         selectedItemColor: _selectedIndex == 0 ? Colors.purple : Colors.red,
         onTap: _onItemTapped,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.push('/create_room');
-        },
-        child: const Icon(Icons.add),
-      ),
     );
   }
 }
