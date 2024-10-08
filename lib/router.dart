@@ -3,23 +3,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'widgets/screen/create_room_screen.dart';
 
-final GoRouter router = GoRouter(initialLocation: "/home", routes: [
-  GoRoute(
-    path: "/home",
-    pageBuilder: (context, state) => const CupertinoPage(child: HomePage()),
-  ),
+const HomePage homePage = HomePage();
 
-
-  //  GoRoute(
-  //   path: "/filter",
-  //   builder: (context, state) => const FilterScreen(),
-  // ),
-  GoRoute(
-    path: "/create_room",
-    builder: (context, state) => const CreateRoomScreen(),
-  ),
-  // GoRoute(
-  //   path: "/chat",
-  //   builder: (context, state) => const ChatScreen(),
-  // ),
-]);
+final GoRouter router = GoRouter(
+  initialLocation: "/home",
+  routes: [
+    GoRoute(
+      path: "/home",
+      pageBuilder: (context, state) => const CupertinoPage(child: homePage),
+    ),
+    GoRoute(
+      path: "/create_room",
+      pageBuilder: (context, state) =>
+          const CupertinoPage(child: CreateRoomScreen()),
+    ),
+  ],
+);

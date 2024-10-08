@@ -221,9 +221,8 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                     // 체크 버튼 클릭 시 입력이 유효할 경우에만 포커스를 해제
                     FocusManager.instance.primaryFocus?.unfocus(); // 포커스 해제
                   });
-                  // 모든 조건이 충족되면 createRoom 메서드 호출
-                  createRoom().then((_) {
-                    context.go('/home');
+                  _createRoom().then((_) {
+                    context.pop();
                   });
                 }
               },

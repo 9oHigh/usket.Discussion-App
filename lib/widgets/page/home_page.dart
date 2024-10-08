@@ -57,7 +57,7 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          context.go('/create_room');
+          context.push('/create_room');
         },
         child: const Icon(Icons.add),
       ),
