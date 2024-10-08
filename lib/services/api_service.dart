@@ -10,7 +10,9 @@ import '../model/player.dart';
 import 'end_point/end_point.dart';
 
 class ApiService {
-  final String baseUrl = "http://10.0.2.2:3000";
+  // Emulator - 10.0.2.2:3000
+  // Device - ifconfig에서 en0에 있는 ip 주소 넣어서 사용 ex) http://127.168.0.23:3000
+  final String baseUrl = "http://192.168.0.23:3000";
 
   Future<List<Topic>> getTopicList() async {
     final response =
@@ -95,12 +97,10 @@ class ApiService {
       ),
     );
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
+    if (200 <= response.statusCode && response.statusCode < 299) {
       return true;
     } else {
-      print('${response.statusCode}, ${response.body}');
       return false;
     }
   }
-  
 }
