@@ -13,63 +13,47 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Room> roomList = [];
-  List<Topic> topicList = [];
-  ApiService apiService = ApiService();
-  Timer? timer;
+  List<Room> _roomList = [];
+  List<Topic> _topicList = [];
+  final ApiService _apiService = ApiService();
+  Timer? _timer;
 
   @override
   void initState() {
-    fetchRoomList();
-    fetchTopicList();
     super.initState();
-    startTimer(); // 타이머 시작
+    _fetchRoomList();
+    _fetchTopicList();
+    _startTimer();
   }
 
   @override
   void dispose() {
-    timer?.cancel(); // 타이머 종료
+    _timer?.cancel();
     super.dispose();
   }
 
-  Future<void> fetchRoomList() async {
-    roomList = await apiService.getRoomList(100);
+  Future<void> _fetchRoomList() async {
+    _roomList = await _apiService.getRoomList(100);
     setState(() {});
   }
 
-  Future<void> fetchTopicList() async {
-    topicList = await apiService.getTopicList();
+  Future<void> _fetchTopicList() async {
+    _topicList = await _apiService.getTopicList();
     setState(() {});
   }
 
-  void startTimer() {
-    timer = Timer.periodic(const Duration(seconds: 30), (Timer t) {
-      checkExpiredRooms();
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      _checkExpiredRooms();
     });
   }
 
-  void checkExpiredRooms() {
-    final now = DateTime.now().toUtc();
-    print("현재 시간 (UTC): ${now.toIso8601String()}");
-
+  _checkExpiredRooms() {
+    final now = DateTime.now();
     setState(() {
-      roomList.removeWhere((room) {
-        // endTime이 DateTime 객체인지 확인
-        DateTime endTimeUtc = room.endTime.toUtc();
-
-        bool isExpired = endTimeUtc.isBefore(now);
-
-        // 시간 차이 계산
-        Duration difference = now.difference(endTimeUtc);
-        print("시간 차이 (초): ${difference.inSeconds}");
-
-        if (isExpired) {
-          print("삭제되는 방: ${room.roomName}, 종료 시간: ${room.endTime}");
-        } else {
-          print(
-              "유지되는 방: ${room.roomName}, 종료까지 남은 시간: ${-difference.inMinutes} 분");
-        }
-
+      _roomList.removeWhere((room) {
+        final DateTime endTime = room.endTime.toLocal();
+        final bool isExpired = endTime.isBefore(now);
         return isExpired;
       });
     });
@@ -80,20 +64,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return Padding(
       padding: const EdgeInsets.all(8),
       child: ListView.builder(
-        itemCount: roomList.length,
+        itemCount: _roomList.length,
         itemBuilder: (context, index) {
-          String topicName;
-
-          try {
-            topicName = topicList
-                .firstWhere(
-                  (topic) => topic.id == roomList[index].topicId,
-                )
-                .name;
-          } catch (e) {
-            topicName = '주제 없음'; // 예외 발생 시 기본값 설정
-          }
-
+          String topicName = _topicList
+              .firstWhere((topic) => topic.id == _roomList[index].topicId)
+              .name;
+          String startTime = DateFormat('yyyy-MM-dd HH:mm')
+              .format(_roomList[index].startTime.toLocal());
+          String endTime = DateFormat('yyyy-MM-dd HH:mm')
+              .format(_roomList[index].endTime.toLocal());
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Container(
@@ -113,11 +92,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(
                       height: 4,
                     ),
-                    Text("방이름: ${roomList[index].roomName}"),
+                    Text("방이름: ${_roomList[index].roomName}"),
                     const SizedBox(
                       height: 4,
                     ),
-                    if (roomList[index].isReserved) ...{
+                    if (_roomList[index].isReserved) ...{
                       Align(
                         alignment: Alignment.centerRight,
                         child: Row(
@@ -138,8 +117,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             ElevatedButton(
                               onPressed: () {
                                 setState(() {
-                                  roomList[index].isReserved =
-                                      !roomList[index].isReserved;
+                                  _roomList[index].isReserved =
+                                      !_roomList[index].isReserved;
                                 });
                               },
                               child: const Text('취소'),
@@ -156,8 +135,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: ElevatedButton(
                           onPressed: () {
                             setState(() {
-                              roomList[index].isReserved =
-                                  !roomList[index].isReserved;
+                              _roomList[index].isReserved =
+                                  !_roomList[index].isReserved;
                             });
                           },
                           child: const Text('예약'),
@@ -167,13 +146,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 4,
                       ),
                     },
-                    Text(
-                        "시작: ${DateFormat('yyyy-MM-dd HH:mm').format(roomList[index].startTime)}"),
+                    Text("시작: $startTime"),
                     const SizedBox(
                       height: 4,
                     ),
-                    Text(
-                        "종료: ${DateFormat('yyyy-MM-dd HH:mm').format(roomList[index].endTime)}"),
+                    Text("종료: $endTime"),
                     const SizedBox(
                       height: 4,
                     ),
