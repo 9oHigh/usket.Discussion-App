@@ -45,7 +45,9 @@ class ApiService {
     if (200 <= response.statusCode && response.statusCode < 299) {
       Map<String, dynamic> jsonMap = jsonDecode(response.body);
       List<dynamic> rooms = jsonMap['rooms'];
-      List<Room> roomList = rooms.map((json) => Room.fromMap(json)).toList();
+      List<Room> roomList = await Future.wait(
+        rooms.map((json) => Room.fromMap(json)).toList(),
+      );
       return roomList;
     } else {
       throw Exception("Failed to load room list");
