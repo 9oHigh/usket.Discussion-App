@@ -1,3 +1,5 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
 class Room {
   int roomId;
   int topicId;
@@ -14,16 +16,28 @@ class Room {
     required this.roomName,
     required this.startTime,
     required this.endTime,
+    this.isReserved = false,
   });
 
-  factory Room.fromMap(Map<String, dynamic> map) {
+  static Future<Room> fromMap(Map<String, dynamic> map) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int roomId = map['id'];
+    final bool isReserved = prefs.getBool('room_$roomId') ?? false;
+
     return Room(
-      roomId: map['id'],
+      roomId: roomId,
       playerId: map['player_id'],
       topicId: map['topic_id'],
       roomName: map['name'],
       startTime: DateTime.parse(map['start_time']),
       endTime: DateTime.parse(map['end_time']),
+      isReserved: isReserved,
     );
+  }
+
+  Future<void> saveIsReserved(bool value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    isReserved = value;
+    await prefs.setBool('room_$roomId', value);
   }
 }
