@@ -71,8 +71,7 @@ class _HomeScreenState extends State<HomeScreen>
     setState(() {
       _roomList.removeWhere((room) {
         final DateTime endTime = room.endTime.toLocal();
-        final bool isExpired = endTime.isBefore(now);
-        return isExpired;
+        return endTime.isBefore(now);
       });
     });
   }
@@ -118,6 +117,7 @@ class _HomeScreenState extends State<HomeScreen>
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Padding(
+                    key: ValueKey(_roomList[index].roomId),
                     padding: const EdgeInsets.all(10.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
