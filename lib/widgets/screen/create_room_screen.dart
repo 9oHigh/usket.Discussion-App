@@ -63,7 +63,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
     final DateTime dateTime = DateFormat('yyyy-MM-dd HH:mm')
         .parse('$_selectedDate $_selectedTime')
         .toLocal();
-    final DateTime endDateTime = dateTime.add(const Duration(minutes: 3));
+    final DateTime endDateTime = dateTime.add(const Duration(hours: 1));
 
     try {
       await _apiService.createRoom(
