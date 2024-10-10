@@ -15,7 +15,7 @@ class FavoriteScreen extends StatefulWidget {
 
 class _FavoriteScreenState extends State<FavoriteScreen>
     with InfiniteScrollMixin<Room, FavoriteScreen> {
-  List<Room> _roomList = [];
+  List<Room> _reservedRoomList = [];
   List<Topic> _topicList = [];
 
   final ApiService _apiService = ApiService();
@@ -46,15 +46,10 @@ class _FavoriteScreenState extends State<FavoriteScreen>
     return response;
   }
 
-  Future<void> _fetchRoomList() async {
-    _roomList = await _apiService.getRoomList(cursorId, 5);
-    setState(() {});
-  }
-
   _checkExpiredRooms() {
     final now = DateTime.now();
     setState(() {
-      _roomList.removeWhere((room) {
+      _reservedRoomList.removeWhere((room) {
         final DateTime endTime = room.endTime.toLocal();
         final bool isExpired = endTime.isBefore(now);
         return isExpired;
@@ -63,30 +58,33 @@ class _FavoriteScreenState extends State<FavoriteScreen>
   }
 
   void _updateReservation(int index) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // 현재 예약 상태를 토글
     setState(() {
-      _roomList[index].isReserved = !_roomList[index].isReserved;
+      _reservedRoomList[index].isReserved =
+          !_reservedRoomList[index].isReserved;
     });
 
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(
-        'room_${_roomList[index].roomId}', _roomList[index].isReserved);
+    // SharedPreferences에 상태 저장
+    await prefs.setBool('room_${_reservedRoomList[index].roomId}',
+        _reservedRoomList[index].isReserved);
 
-    // 예약이 취소된 경우 방 목록에서 제거
+    // 예약 상태에 따라 리스트 업데이트
     setState(() {
-      _roomList.removeAt(index);
+      _reservedRoomList =
+          _reservedRoomList.where((room) => room.isReserved).toList();
     });
   }
 
-
-  // 예약된 방 필터링
+  // 예약된 방 불러오기
   Future<void> _fetchReservedRoomList() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<Room> allRooms =
-        await _apiService.getRoomList(cursorId, 5);
+    List<Room> allRooms = await _apiService.getRoomList(cursorId, 5);
 
-    _roomList = allRooms.where((room) {
+    _reservedRoomList = allRooms.where((room) {
       room.isReserved = prefs.getBool('room_${room.roomId}') ?? false;
-      return room.isReserved; 
+      return room.isReserved;
     }).toList(); // 예약된 방만 반환해서 리스트로 변환
 
     setState(() {}); // UI 업데이트
@@ -98,15 +96,16 @@ class _FavoriteScreenState extends State<FavoriteScreen>
       padding: const EdgeInsets.all(8),
       child: ListView.builder(
         controller: _scrollController,
-        itemCount: _roomList.length,
+        itemCount: _reservedRoomList.length,
         itemBuilder: (context, index) {
           String topicName = _topicList
-              .firstWhere((topic) => topic.id == _roomList[index].topicId)
+              .firstWhere(
+                  (topic) => topic.id == _reservedRoomList[index].topicId)
               .name;
           String startTime = DateFormat('yyyy-MM-dd HH:mm')
-              .format(_roomList[index].startTime.toLocal());
+              .format(_reservedRoomList[index].startTime.toLocal());
           String endTime = DateFormat('yyyy-MM-dd HH:mm')
-              .format(_roomList[index].endTime.toLocal());
+              .format(_reservedRoomList[index].endTime.toLocal());
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Container(
@@ -126,11 +125,11 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                     const SizedBox(
                       height: 4,
                     ),
-                    Text("방이름: ${_roomList[index].roomName}"),
+                    Text("방이름: ${_reservedRoomList[index].roomName}"),
                     const SizedBox(
                       height: 4,
                     ),
-                    if (_roomList[index].isReserved) ...{
+                    if (_reservedRoomList[index].isReserved) ...{
                       Align(
                         alignment: Alignment.centerRight,
                         child: Row(
@@ -151,6 +150,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                             ElevatedButton(
                               onPressed: () {
                                 _updateReservation(index);
+                                setState(() {});
                               },
                               child: const Text('취소'),
                             ),
