@@ -1,3 +1,4 @@
+import 'package:app_team1/manager/topic_manager.dart';
 import 'package:app_team1/model/player.dart';
 import 'package:app_team1/router.dart';
 import 'package:app_team1/services/api_service.dart';
@@ -9,15 +10,22 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   tz.initializeTimeZones();
   await _initializeUser();
+  await _initializeTopicManager();
   runApp(const AppTeam1());
 }
 
 _initializeUser() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  Player? player = await ApiService().getOrCreatePlayer();
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  final Player? player = await ApiService().getOrCreatePlayer();
   if (player != null) {
     prefs.setInt("playerId", player.id);
   }
+}
+
+_initializeTopicManager() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  final int? selectedTopic = prefs.getInt("selectedTopic");
+  TopicManager().setTopicId(selectedTopic);
 }
 
 class AppTeam1 extends StatelessWidget {

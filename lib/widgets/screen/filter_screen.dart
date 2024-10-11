@@ -1,7 +1,9 @@
 import 'package:app_team1/manager/toast_manager.dart';
+import 'package:app_team1/manager/topic_manager.dart';
 import 'package:app_team1/model/topic/topic_count.dart';
 import 'package:app_team1/model/topic/topic_item.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/constants.dart';
 import 'package:go_router/go_router.dart';
 import '../../model/topic/topic.dart';
@@ -22,7 +24,9 @@ class _FilterScreenState extends State<FilterScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchTopicList();
+    _fetchTopicList().then((_) {
+      _setSelectedTopic();
+    });
   }
 
   Future<void> _fetchTopicList() async {
@@ -34,7 +38,7 @@ class _FilterScreenState extends State<FilterScreen> {
       };
       List<TopicItem> topicItemList = topicList.map((topic) {
         String count = topicCountMap[topic.id] ?? "0";
-        return TopicItem.fromData(topic.name, count);
+        return TopicItem.fromData(topic.id, topic.name, count);
       }).toList();
 
       setState(() {
@@ -42,6 +46,18 @@ class _FilterScreenState extends State<FilterScreen> {
       });
     } catch (e) {
       ToastManager().showToast(context, "토픽들을 가져오지 못했어요.\n다시 시도해주세요.");
+    }
+  }
+
+  Future<void> _setSelectedTopic() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int? topicId = prefs.getInt("selectedTopic");
+    final int selectedIndex =
+        _topicList.indexWhere((topic) => topic.id == topicId);
+    if (selectedIndex != -1) {
+      setState(() {
+        _selectedIndex = selectedIndex;
+      });
     }
   }
 
@@ -59,7 +75,14 @@ class _FilterScreenState extends State<FilterScreen> {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              if (_selectedIndex != null) {
+                TopicManager().setTopicId(_topicList[_selectedIndex!].id);
+              } else {
+                ToastManager().showToast(context, "토픽을 선택해주세요!");
+              }
+              context.pop(true);
+            },
             icon: const Icon(Icons.check),
           ),
         ],
@@ -88,7 +111,12 @@ class _FilterScreenState extends State<FilterScreen> {
                       GestureDetector(
                         onTap: () {
                           setState(() {
-                            _selectedIndex = index;
+                            if (_selectedIndex != null &&
+                                _selectedIndex == index) {
+                              _selectedIndex = null;
+                            } else {
+                              _selectedIndex = index;
+                            }
                           });
                         },
                         child: Container(

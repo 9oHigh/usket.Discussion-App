@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app_team1/manager/topic_manager.dart';
 import 'package:app_team1/model/room.dart';
 import 'package:app_team1/model/topic/topic.dart';
 import 'package:app_team1/model/topic/topic_count.dart';
@@ -43,8 +44,8 @@ class ApiService {
     }
   }
 
-  Future<List<Room>> getRoomList(String? cursorId, int limit,
-      {int? topicId}) async {
+  Future<List<Room>> getRoomList(String? cursorId, int limit) async {
+    final int? selectedTopicId = TopicManager().getTopicId;
     final response = await http.post(
       Uri.parse("$baseUrl${EndPoint.roomList.url}"),
       headers: <String, String>{
@@ -53,7 +54,7 @@ class ApiService {
       body: jsonEncode(<String, dynamic>{
         'limit': limit,
         'cursorId': cursorId,
-        'topicId': topicId,
+        'topicId': selectedTopicId,
       }),
     );
 
