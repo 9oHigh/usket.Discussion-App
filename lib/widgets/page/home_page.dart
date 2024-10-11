@@ -34,7 +34,7 @@ class _HomePageState extends State<HomePage> {
         actions: [
           IconButton(
             onPressed: () {
-              // MARK: - context.go('/filter')
+              context.push('/filter');
             },
             icon: const Icon(Icons.filter_alt),
           ),

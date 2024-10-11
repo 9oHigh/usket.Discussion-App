@@ -14,6 +14,17 @@ class ApiService {
   // Device - ifconfig에서 en0에 있는 ip 주소 넣어서 사용 ex) http://127.168.0.23:3000
   final String baseUrl = "http://192.168.0.23:3000";
 
+  Future<List<Map<String, dynamic>>> getTopicRoomCounts() async {
+    final response = await http.get(Uri.parse("$baseUrl${EndPoint.topicRoomCount.url}"));
+    
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((item) => Map<String, dynamic>.from(item)).toList();
+    } else {
+      throw Exception('Failed to load topic room counts');
+    }
+  }
+
   Future<List<Topic>> getTopicList() async {
     final response =
         await http.get(Uri.parse("$baseUrl${EndPoint.topicList.url}"));
