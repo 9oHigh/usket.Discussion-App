@@ -35,6 +35,19 @@ class Room {
     );
   }
 
+  static Room toReservedRoom(Room room) {
+    room.saveIsReserved(true);
+    return Room(
+      roomId: room.roomId,
+      topicId: room.topicId,
+      playerId: room.playerId,
+      roomName: room.roomName,
+      startTime: room.startTime,
+      endTime: room.endTime,
+      isReserved: true,
+    );
+  }
+
   Future<void> saveIsReserved(bool value) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     isReserved = value;

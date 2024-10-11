@@ -3,7 +3,6 @@ import 'package:app_team1/model/topic.dart';
 import 'package:app_team1/services/api_service.dart';
 import 'package:app_team1/widgets/utils/infinite_scroll_mixin.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'package:permission_handler/permission_handler.dart';
@@ -89,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   Future<void> _fetchTopicList() async {
     _topicList = await _apiService.getTopicList();
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   Future<void> _fetchRoomList({bool? isReload}) async {
@@ -101,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen>
           .where((room) => !room.isReserved && now.isBefore(room.startTime))
           .toList();
       cursorId = _roomList.last.roomId.toString();
-      setState(() {});
+      if (mounted) setState(() {});
     } else {
       final toBeAddedRooms = await _apiService.getRoomList(cursorId, 10);
       if (toBeAddedRooms.isEmpty) {
@@ -173,7 +172,6 @@ class _HomeScreenState extends State<HomeScreen>
                       )
                     : const SizedBox.shrink();
               }
-
               String topicName = _topicList
                   .firstWhere((topic) => topic.id == _roomList[index].topicId)
                   .name;
@@ -227,13 +225,6 @@ class _HomeScreenState extends State<HomeScreen>
             },
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final isCreated = await context.push('/create_room');
-          if (isCreated == true) _fetchRoomList(isReload: true);
-        },
-        child: const Icon(Icons.add),
       ),
     );
   }

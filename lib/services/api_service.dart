@@ -12,7 +12,7 @@ import 'end_point/end_point.dart';
 class ApiService {
   // Emulator - 10.0.2.2:3000
   // Device - ifconfig에서 en0에 있는 ip 주소 넣어서 사용 ex) http://127.168.0.23:3000
-  final String baseUrl = "http://10.0.2.2:3000";
+  final String baseUrl = "http://192.168.0.23:3000";
 
   Future<List<Topic>> getTopicList() async {
     final response =
@@ -55,12 +55,12 @@ class ApiService {
   }
 
   Future<Player?> getOrCreatePlayer() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    String? savedUuid = pref.getString("uuid");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedUuid = prefs.getString("uuid");
 
     if (savedUuid == null) {
-      var uuid = const Uuid().v1();
-      pref.setString("uuid", uuid);
+      var uuid = const Uuid().v4();
+      prefs.setString("uuid", uuid);
       savedUuid = uuid;
     }
 
@@ -95,6 +95,26 @@ class ApiService {
           'playerId': playerId,
           'startTime': startTime.toIso8601String(),
           'endTime': endTime.toIso8601String(),
+        },
+      ),
+    );
+
+    if (200 <= response.statusCode && response.statusCode < 299) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  Future<bool> deleteRoom(int roomId) async {
+    final response = await http.delete(
+      Uri.parse("$baseUrl${EndPoint.deleteRoom.url}"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
+      body: jsonEncode(
+        <String, dynamic>{
+          'roomId': roomId,
         },
       ),
     );

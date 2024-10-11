@@ -5,6 +5,7 @@ enum EndPoint {
   roomList,
   roomCreate,
   roomIdList,
+  deleteRoom,
 }
 
 extension EndPointExtension on EndPoint {
@@ -22,6 +23,8 @@ extension EndPointExtension on EndPoint {
         return '/room/create';
       case EndPoint.roomIdList:
         return '/room/ids';
+      case EndPoint.deleteRoom:
+        return '/room/delete';
       default:
         return '';
     }

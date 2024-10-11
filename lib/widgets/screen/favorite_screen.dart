@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:app_team1/manager/toast_manager.dart';
 import 'package:app_team1/services/api_service.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../model/room.dart';
 import 'package:app_team1/model/topic.dart';
 import '../../widgets/utils/infinite_scroll_mixin.dart';
@@ -32,10 +33,22 @@ class _FavoriteScreenState extends State<FavoriteScreen>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _reloadRoomList();
+  }
+
+  @override
   void dispose() {
     _timer?.cancel();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  _reloadRoomList() {
+    setState(() {
+      _fetchRoomList(isReload: true);
+    });
   }
 
   _initailizeRoomList() async {
@@ -61,35 +74,59 @@ class _FavoriteScreenState extends State<FavoriteScreen>
 
   Future<void> _fetchTopicList() async {
     _topicList = await _apiService.getTopicList();
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   _updateReservation(int index) async {
-    ToastManager().showToast(
-        context, "[${_reservedRoomList[index].roomName}] 토론방을 취소할게요.");
-    setState(() {
-      _reservedRoomList[index].saveIsReserved(false);
-      _reservedRoomList.removeAt(index);
-    });
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int playerId = prefs.getInt("playerId") ?? 0;
+    final int roomId = _reservedRoomList[index].roomId;
+
+    if (_reservedRoomList[index].playerId == playerId) {
+      try {
+        await _apiService.deleteRoom(roomId);
+        ToastManager().showToast(
+            context, "[${_reservedRoomList[index].roomName}] 토론방을 취소했습니다.");
+        setState(() {
+          _fetchRoomList(isReload: true);
+        });
+      } catch (e) {
+        ToastManager().showToast(context,
+            "[${_reservedRoomList[index].roomName}] 토론방을 취소하지 못했어요.\n다시 시도해주세요.\nERROR: $e");
+      }
+    } else {
+      ToastManager().showToast(
+          context, "[${_reservedRoomList[index].roomName}] 토론방을 취소했습니다.");
+      setState(() {
+        _reservedRoomList[index].saveIsReserved(false);
+        _reservedRoomList.removeAt(index);
+      });
+    }
   }
 
   Future<void> _fetchRoomList({bool? isReload}) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int playerId = prefs.getInt("playerId") ?? 0;
+
     if (isReload != null && isReload) {
       _reservedRoomList = await _apiService.getRoomList(null, 10);
-      _reservedRoomList =
-          _reservedRoomList.where((room) => room.isReserved).toList();
+      _reservedRoomList = _reservedRoomList
+          .where((room) => room.isReserved || room.playerId == playerId)
+          .map((room) => Room.toReservedRoom(room))
+          .toList();
       if (_reservedRoomList.isNotEmpty) {
         cursorId = _reservedRoomList.last.roomId.toString();
       }
-      setState(() {});
+      if (mounted) setState(() {});
     } else {
       final toBeAddedRooms = await _apiService.getRoomList(cursorId, 10);
       if (toBeAddedRooms.isEmpty) {
         return;
       } else {
         _reservedRoomList += toBeAddedRooms;
-        _reservedRoomList =
-            _reservedRoomList.where((room) => room.isReserved).toList();
+        _reservedRoomList = _reservedRoomList
+            .where((room) => room.isReserved || room.playerId == playerId)
+            .toList();
         if (_reservedRoomList.isNotEmpty) {
           cursorId = _reservedRoomList.last.roomId.toString();
         }
@@ -105,8 +142,18 @@ class _FavoriteScreenState extends State<FavoriteScreen>
         padding: const EdgeInsets.all(8),
         child: ListView.builder(
           controller: _scrollController,
-          itemCount: _reservedRoomList.length,
+          itemCount: _reservedRoomList.length + 1,
           itemBuilder: (context, index) {
+            if (index == _reservedRoomList.length) {
+              return isLoading
+                  ? const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  : const SizedBox.shrink();
+            }
             String topicName = _topicList
                 .firstWhere(
                     (topic) => topic.id == _reservedRoomList[index].topicId)
