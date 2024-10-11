@@ -14,7 +14,7 @@ import 'end_point/end_point.dart';
 class ApiService {
   // Emulator - 10.0.2.2:3000
   // Device - ifconfig에서 en0에 있는 ip 주소 넣어서 사용 ex) http://127.168.0.23:3000
-  final String baseUrl = "http://192.168.0.23:3000";
+  final String baseUrl = "http://10.0.2.2:3000";
 
   Future<List<TopicCount>> getTopicRoomCounts() async {
     final response =

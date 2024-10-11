@@ -100,7 +100,9 @@ class _HomeScreenState extends State<HomeScreen>
       _roomList = _roomList
           .where((room) => !room.isReserved && now.isBefore(room.startTime))
           .toList();
-      cursorId = _roomList.last.roomId.toString();
+      if (_roomList.isNotEmpty) {
+        cursorId = _roomList.last.roomId.toString();
+      }
       if (mounted) setState(() {});
     } else {
       final toBeAddedRooms = await _apiService.getRoomList(cursorId, 10);
@@ -111,7 +113,9 @@ class _HomeScreenState extends State<HomeScreen>
         _roomList = _roomList
             .where((room) => !room.isReserved && now.isBefore(room.startTime))
             .toList();
-        cursorId = _roomList.last.roomId.toString();
+        if (_roomList.isNotEmpty) {
+          cursorId = _roomList.last.roomId.toString();
+        }
       }
     }
   }
