@@ -1,8 +1,9 @@
 import 'package:app_team1/model/room.dart';
-import 'package:app_team1/model/topic.dart';
+import 'package:app_team1/model/topic/topic.dart';
 import 'package:app_team1/services/api_service.dart';
 import 'package:app_team1/widgets/utils/infinite_scroll_mixin.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'package:permission_handler/permission_handler.dart';
@@ -34,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen>
     initializeScrollController(_scrollController, _fetchRoomList);
     _permissionWithNotification();
     _initializeNotifications();
-    _inintializeRoomList();
+    _initializeRoomList();
     _startTimer();
   }
 
@@ -65,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen>
     await _flutterLocalNotificationsPlugin.initialize(settings);
   }
 
-  _inintializeRoomList() async {
+  _initializeRoomList() async {
     await _fetchTopicList();
     await _fetchRoomList(isReload: true);
   }
@@ -154,6 +155,21 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('방 목록'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () async {
+              final isSelected = await context.push("/filter");
+              if (isSelected == true) {
+                await _initializeRoomList();
+              }
+            },
+            icon: const Icon(Icons.filter_alt),
+          ),
+        ],
+      ),
       body: RefreshIndicator(
         onRefresh: () => _fetchRoomList(isReload: true),
         child: Padding(

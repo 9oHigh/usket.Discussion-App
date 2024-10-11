@@ -4,10 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../model/topic.dart';
+import '../../model/topic/topic.dart';
 import 'package:go_router/go_router.dart';
 import '../../styles/text_button_style.dart';
-import '../../styles/constants.dart';
+import '../utils/constants.dart';
 
 enum CreateError {
   failCreate,

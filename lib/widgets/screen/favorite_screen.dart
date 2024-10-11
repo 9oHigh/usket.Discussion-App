@@ -3,9 +3,10 @@ import 'package:app_team1/manager/toast_manager.dart';
 import 'package:app_team1/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../model/room.dart';
-import 'package:app_team1/model/topic.dart';
+import 'package:app_team1/model/topic/topic.dart';
 import '../../widgets/utils/infinite_scroll_mixin.dart';
 import 'package:intl/intl.dart';
 
@@ -144,112 +145,129 @@ class _FavoriteScreenState extends State<FavoriteScreen>
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: () => _fetchRoomList(isReload: true),
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: ListView.builder(
-          controller: _scrollController,
-          itemCount: _reservedRoomList.length + 1,
-          itemBuilder: (context, index) {
-            if (index == _reservedRoomList.length) {
-              return isLoading
-                  ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: CircularProgressIndicator(),
-                      ),
-                    )
-                  : const SizedBox.shrink();
-            }
-            String topicName = _topicList
-                .firstWhere(
-                    (topic) => topic.id == _reservedRoomList[index].topicId)
-                .name;
-            String startTime = DateFormat('yyyy-MM-dd HH:mm')
-                .format(_reservedRoomList[index].startTime.toLocal());
-            String endTime = DateFormat('yyyy-MM-dd HH:mm')
-                .format(_reservedRoomList[index].endTime.toLocal());
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.grey,
-                    width: 0.5,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('마이'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () async {
+              final isSelected = await context.push("/filter");
+              if (isSelected == true) {
+                await _initailizeRoomList();
+              }
+            },
+            icon: const Icon(Icons.filter_alt),
+          ),
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: () => _fetchRoomList(isReload: true),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: ListView.builder(
+            controller: _scrollController,
+            itemCount: _reservedRoomList.length + 1,
+            itemBuilder: (context, index) {
+              if (index == _reservedRoomList.length) {
+                return isLoading
+                    ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
+                    : const SizedBox.shrink();
+              }
+              String topicName = _topicList
+                  .firstWhere(
+                      (topic) => topic.id == _reservedRoomList[index].topicId)
+                  .name;
+              String startTime = DateFormat('yyyy-MM-dd HH:mm')
+                  .format(_reservedRoomList[index].startTime.toLocal());
+              String endTime = DateFormat('yyyy-MM-dd HH:mm')
+                  .format(_reservedRoomList[index].endTime.toLocal());
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.grey,
+                      width: 0.5,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("주제: $topicName"),
-                      const SizedBox(
-                        height: 4,
-                      ),
-                      Text("방이름: ${_reservedRoomList[index].roomName}"),
-                      const SizedBox(
-                        height: 4,
-                      ),
-                      if (_reservedRoomList[index].isReserved) ...{
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blue[400]),
-                                onPressed: () {},
-                                child: const Text(
-                                  '참여',
-                                  style: TextStyle(color: Colors.white),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("주제: $topicName"),
+                        const SizedBox(
+                          height: 4,
+                        ),
+                        Text("방이름: ${_reservedRoomList[index].roomName}"),
+                        const SizedBox(
+                          height: 4,
+                        ),
+                        if (_reservedRoomList[index].isReserved) ...{
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.blue[400]),
+                                  onPressed: () {},
+                                  child: const Text(
+                                    '참여',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(
-                                width: 4,
-                              ),
-                              ElevatedButton(
-                                onPressed: () {
-                                  _updateReservation(index);
-                                  _cancelNotification(index);
-                                },
-                                child: const Text('취소'),
-                              ),
-                            ],
+                                const SizedBox(
+                                  width: 4,
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    _updateReservation(index);
+                                    _cancelNotification(index);
+                                  },
+                                  child: const Text('취소'),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
+                          const SizedBox(
+                            height: 4,
+                          ),
+                        } else ...{
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: ElevatedButton(
+                              onPressed: () => _updateReservation(index),
+                              child: const Text('예약'),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 4,
+                          ),
+                        },
+                        Text("시작: $startTime"),
                         const SizedBox(
                           height: 4,
                         ),
-                      } else ...{
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: ElevatedButton(
-                            onPressed: () => _updateReservation(index),
-                            child: const Text('예약'),
-                          ),
-                        ),
+                        Text("종료: $endTime"),
                         const SizedBox(
                           height: 4,
                         ),
-                      },
-                      Text("시작: $startTime"),
-                      const SizedBox(
-                        height: 4,
-                      ),
-                      Text("종료: $endTime"),
-                      const SizedBox(
-                        height: 4,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
