@@ -79,7 +79,7 @@ class _FilterScreenState extends State<FilterScreen> {
               if (_selectedIndex != null) {
                 TopicManager().setTopicId(_topicList[_selectedIndex!].id);
               } else {
-                ToastManager().showToast(context, "토픽을 선택해주세요!");
+                TopicManager().setTopicId(null);
               }
               context.pop(true);
             },

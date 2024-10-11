@@ -64,7 +64,13 @@ class ApiService {
       List<Room> roomList = await Future.wait(
         rooms.map((json) => Room.fromMap(json)).toList(),
       );
-      return roomList;
+      if (selectedTopicId != null) {
+        return roomList
+            .where((room) => room.topicId == selectedTopicId)
+            .toList();
+      } else {
+        return roomList;
+      }
     } else {
       throw Exception("Failed to load room list");
     }

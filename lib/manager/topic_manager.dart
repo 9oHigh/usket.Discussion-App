@@ -12,9 +12,11 @@ class TopicManager {
   int? topicId;
 
   setTopicId(int? filteredTopicId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     if (filteredTopicId != null) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setInt("selectedTopic", filteredTopicId);
+    } else {
+      prefs.remove("selectedTopic");
     }
     topicId = filteredTopicId;
   }

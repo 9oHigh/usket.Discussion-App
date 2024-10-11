@@ -28,18 +28,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_selectedIndex == 0 ? '방 목록' : '마이'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () async {
-              context.push('/filter');
-            },
-            icon: const Icon(Icons.filter_alt),
-          ),
-        ],
-      ),
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
