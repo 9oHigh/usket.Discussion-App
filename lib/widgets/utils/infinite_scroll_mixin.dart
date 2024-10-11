@@ -9,15 +9,19 @@ mixin InfiniteScrollMixin<T extends StatefulWidget> on State<T> {
     controller.addListener(() async {
       if (controller.position.pixels == controller.position.maxScrollExtent &&
           !isLoading) {
-        setState(() {
-          isLoading = true;
-        });
+        if (mounted) {
+          setState(() {
+            isLoading = true;
+          });
+        }
         await fetchData();
         // 딜레이를 통해서 확인 하기
         await Future.delayed(const Duration(seconds: 1));
-        setState(() {
-          isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            isLoading = false;
+          });
+        }
       }
     });
   }

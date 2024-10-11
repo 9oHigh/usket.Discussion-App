@@ -1,4 +1,5 @@
 import 'package:app_team1/manager/toast_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../services/api_service.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +47,6 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
 
   String _selectedDate = '';
   String _selectedTime = '';
-
   int? _selectedTopicId;
   String _selectedTopicName = '선택하기';
 
@@ -64,12 +64,18 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
         .parse('$_selectedDate $_selectedTime')
         .toLocal();
     final DateTime endDateTime = dateTime.add(const Duration(hours: 1));
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int? playerId = prefs.getInt("playerId");
 
     try {
+      if (playerId == null) {
+        throw Exception("등록되지 않은 유저입니다.\n회원가입을 위해 재접속해주세요.");
+      }
+      
       await _apiService.createRoom(
         _selectedTopicId!,
         _roomNameController.text,
-        0,
+        playerId,
         dateTime.toUtc(),
         endDateTime.toUtc(),
       );
