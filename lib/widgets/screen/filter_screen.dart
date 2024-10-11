@@ -1,7 +1,10 @@
+import 'package:app_team1/manager/toast_manager.dart';
+import 'package:app_team1/model/topic/topic_count.dart';
+import 'package:app_team1/model/topic/topic_item.dart';
 import 'package:flutter/material.dart';
-import '../../styles/constants.dart';
+import '../utils/constants.dart';
 import 'package:go_router/go_router.dart';
-import '../../model/topic.dart';
+import '../../model/topic/topic.dart';
 import '../../services/api_service.dart';
 
 class FilterScreen extends StatefulWidget {
@@ -12,10 +15,9 @@ class FilterScreen extends StatefulWidget {
 }
 
 class _FilterScreenState extends State<FilterScreen> {
-  List<Topic> _topicList = [];
   final ApiService _apiService = ApiService();
+  List<TopicItem> _topicList = [];
   int? _selectedIndex;
-  List<int> _roomCounts = [];
 
   @override
   void initState() {
@@ -24,96 +26,111 @@ class _FilterScreenState extends State<FilterScreen> {
   }
 
   Future<void> _fetchTopicList() async {
-  try {
-    _topicList = await _apiService.getTopicList();
-    List<dynamic> roomCountsData = await _apiService.getTopicRoomCounts();
-    
-    Map<String, int> roomCountMap = {
-      for (var item in roomCountsData)
-        item['id'].toString(): int.parse(item['room_count'].toString())
-    };
-    
-    _roomCounts = _topicList.map((topic) => 
-      roomCountMap[topic.id.toString()] ?? 0
-    ).toList();
+    try {
+      List<Topic> topicList = await _apiService.getTopicList();
+      List<TopicCount> topicCounts = await _apiService.getTopicRoomCounts();
+      Map<int, String> topicCountMap = {
+        for (var count in topicCounts) count.id: count.count
+      };
+      List<TopicItem> topicItemList = topicList.map((topic) {
+        String count = topicCountMap[topic.id] ?? "0";
+        return TopicItem.fromData(topic.name, count);
+      }).toList();
 
-    setState(() {});
-  } catch (e) {
-    print('오류가 발생했습니다.: $e');
+      setState(() {
+        _topicList = topicItemList;
+      });
+    } catch (e) {
+      ToastManager().showToast(context, "토픽들을 가져오지 못했어요.\n다시 시도해주세요.");
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-            icon: const Icon(Icons.close), onPressed: () => context.pop()),
+          icon: const Icon(Icons.close),
+          onPressed: () => context.pop(),
+        ),
         title: const Align(
-            alignment: Alignment.center, child: Text('Topic Filter')),
+          alignment: Alignment.center,
+          child: Text('토픽 설정'),
+        ),
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.check)),
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.check),
+          ),
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(30, 20, 20, 30),
-        child: Wrap(
-            alignment: WrapAlignment.start,
-            spacing: 12.0,
-            runSpacing: 12.0,
-            children: _topicList.isNotEmpty
-                ? _topicList.asMap().entries.map((entry) {
-                  int index = entry.key;
-                  Topic topic = entry.value;
-
-                    return Stack(children: [
+        child: _topicList.isEmpty
+            ? const Center(
+                child: Text(
+                  '주제를 불러오는 데 실패했습니다.',
+                  style: TextStyle(color: Colors.black),
+                ),
+              )
+            : Wrap(
+                alignment: WrapAlignment.start,
+                spacing: 12.0,
+                runSpacing: 12.0,
+                children: List.generate(_topicList.length, (index) {
+                  bool isSelected = _selectedIndex == index;
+                  Color boxColor = isSelected ? Colors.blue : Colors.blue[50]!;
+                  Color badgeColor = isSelected ? Colors.white : Colors.blue;
+                  Color badgeTextColor =
+                      isSelected ? Colors.black : Colors.white;
+                  return Stack(
+                    children: [
                       GestureDetector(
                         onTap: () {
                           setState(() {
-                             _selectedIndex = index;
+                            _selectedIndex = index;
                           });
                         },
                         child: Container(
                           width: AppConstants.topicBoxSize(context),
                           height: AppConstants.topicBoxSize(context),
                           decoration: BoxDecoration(
-                            color: _selectedIndex == index ? Colors.blue : Colors.blue[50],
+                            color: boxColor,
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Center(
-                              child: Text(
-                            topic.name,
-                            style: const TextStyle(fontWeight: FontWeight.w500),
-                          )),
+                            child: Text(
+                              _topicList[index].name,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w500),
+                            ),
+                          ),
                         ),
                       ),
                       Positioned(
-                          right: 0,
-                          bottom: 0,
-                          child: Container(
-                              alignment: Alignment.center,
-                              width: AppConstants.badgeSize(context),
-                              height: AppConstants.badgeSize(context),
-                              decoration: BoxDecoration(
-                                color: _selectedIndex == index ? Colors.white : Colors.blue,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Text(
-                                '${_roomCounts[index]}',
-                                style: TextStyle(
-                                    color: _selectedIndex == index ? Colors.black : Colors.white,
-                                    fontWeight: FontWeight.w500),
-                              )))
-                    ]);
-                  }).toList()
-                : [
-                    const Center(
-                      child: Text(
-                        '주제를 불러오는 데 실패했습니다.',
-                        style: TextStyle(color: Colors.black),
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          alignment: Alignment.center,
+                          width: AppConstants.badgeSize(context),
+                          height: AppConstants.badgeSize(context),
+                          decoration: BoxDecoration(
+                            color: badgeColor,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            _topicList[index].count,
+                            style: TextStyle(
+                              color: badgeTextColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ]),
+                    ],
+                  );
+                }),
+              ),
       ),
     );
   }

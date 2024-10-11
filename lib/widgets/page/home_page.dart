@@ -33,7 +33,7 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: () {
+            onPressed: () async {
               context.push('/filter');
             },
             icon: const Icon(Icons.filter_alt),

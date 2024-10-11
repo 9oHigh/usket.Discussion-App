@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../model/room.dart';
-import 'package:app_team1/model/topic.dart';
+import 'package:app_team1/model/topic/topic.dart';
 import '../../widgets/utils/infinite_scroll_mixin.dart';
 import 'package:intl/intl.dart';
 

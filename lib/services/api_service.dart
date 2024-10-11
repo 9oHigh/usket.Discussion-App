@@ -1,7 +1,8 @@
 import 'dart:convert';
 
 import 'package:app_team1/model/room.dart';
-import 'package:app_team1/model/topic.dart';
+import 'package:app_team1/model/topic/topic.dart';
+import 'package:app_team1/model/topic/topic_count.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
@@ -14,12 +15,15 @@ class ApiService {
   // Device - ifconfig에서 en0에 있는 ip 주소 넣어서 사용 ex) http://127.168.0.23:3000
   final String baseUrl = "http://192.168.0.23:3000";
 
-  Future<List<Map<String, dynamic>>> getTopicRoomCounts() async {
-    final response = await http.get(Uri.parse("$baseUrl${EndPoint.topicRoomCount.url}"));
-    
+  Future<List<TopicCount>> getTopicRoomCounts() async {
+    final response =
+        await http.get(Uri.parse("$baseUrl${EndPoint.topicRoomCount.url}"));
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      return data.map((item) => Map<String, dynamic>.from(item)).toList();
+      final List<TopicCount> topicCounts =
+          data.map((json) => TopicCount.fromJson(json)).toList();
+      return topicCounts;
     } else {
       throw Exception('Failed to load topic room counts');
     }

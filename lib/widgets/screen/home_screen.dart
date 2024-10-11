@@ -1,5 +1,5 @@
 import 'package:app_team1/model/room.dart';
-import 'package:app_team1/model/topic.dart';
+import 'package:app_team1/model/topic/topic.dart';
 import 'package:app_team1/services/api_service.dart';
 import 'package:app_team1/widgets/utils/infinite_scroll_mixin.dart';
 import 'package:flutter/material.dart';
