@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:app_team1/manager/toast_manager.dart';
 import 'package:app_team1/services/api_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../model/room.dart';
 import 'package:app_team1/model/topic.dart';
@@ -23,6 +24,8 @@ class _FavoriteScreenState extends State<FavoriteScreen>
 
   final ApiService _apiService = ApiService();
   final ScrollController _scrollController = ScrollController();
+  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   @override
   void initState() {
@@ -72,11 +75,6 @@ class _FavoriteScreenState extends State<FavoriteScreen>
     });
   }
 
-  Future<void> _fetchTopicList() async {
-    _topicList = await _apiService.getTopicList();
-    if (mounted) setState(() {});
-  }
-
   _updateReservation(int index) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final int playerId = prefs.getInt("playerId") ?? 0;
@@ -102,6 +100,16 @@ class _FavoriteScreenState extends State<FavoriteScreen>
         _reservedRoomList.removeAt(index);
       });
     }
+  }
+
+  Future<void> _cancelNotification(int index) async {
+    int notificationId = _reservedRoomList[index].roomId;
+    await _flutterLocalNotificationsPlugin.cancel(notificationId);
+  }
+
+  Future<void> _fetchTopicList() async {
+    _topicList = await _apiService.getTopicList();
+    if (mounted) setState(() {});
   }
 
   Future<void> _fetchRoomList({bool? isReload}) async {
@@ -204,7 +212,10 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                                 width: 4,
                               ),
                               ElevatedButton(
-                                onPressed: () => _updateReservation(index),
+                                onPressed: () {
+                                  _updateReservation(index);
+                                  _cancelNotification(index);
+                                },
                                 child: const Text('취소'),
                               ),
                             ],
