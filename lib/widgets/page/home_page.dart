@@ -1,6 +1,7 @@
 import 'package:app_team1/widgets/screen/favorite_screen.dart';
 import 'package:app_team1/widgets/screen/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -32,7 +33,7 @@ class _HomePageState extends State<HomePage> {
         actions: [
           IconButton(
             onPressed: () {
-              // MARK: - context.go('/filter')
+              context.push('/filter');
             },
             icon: const Icon(Icons.filter_alt),
           ),

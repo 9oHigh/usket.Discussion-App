@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../model/topic.dart';
 import 'package:go_router/go_router.dart';
-import '../utils/text_button_style.dart';
+import '../../styles/text_button_style.dart';
+import '../../styles/constants.dart';
 
 enum CreateError {
   failCreate,
@@ -172,14 +173,6 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final double spaceBetweenColumns = screenHeight * 0.05;
-    final double spaceBetweenElements = screenHeight * 0.015;
-    final double textFieldWidth = screenWidth * 0.9;
-    final double buttonWidth = screenWidth * 0.9;
-    final double buttonHieght = screenHeight * 0.04;
-
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
@@ -220,9 +213,9 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('방 이름'),
-                  SizedBox(height: spaceBetweenElements),
+                  SizedBox(height: AppConstants.spaceBetweenElements(context)),
                   SizedBox(
-                    width: textFieldWidth,
+                    width: AppConstants.textFieldWidth(context),
                     child: TextField(
                       controller: _roomNameController,
                       focusNode: _focusNode,
@@ -233,29 +226,29 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: spaceBetweenColumns),
+              SizedBox(height: AppConstants.spaceBetweenColumns(context)),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('주제 선택'),
-                  SizedBox(height: spaceBetweenElements),
+                  SizedBox(height: AppConstants.spaceBetweenElements(context)),
                   ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        minimumSize: Size(buttonWidth, buttonHieght),
+                        minimumSize: Size(AppConstants.buttonWidth(context), AppConstants.buttonHeight(context)),
                       ),
                       onPressed: () => _showSubjecSelectDialog(context),
                       child: Text(_selectedTopicName))
                 ],
               ),
-              SizedBox(height: spaceBetweenColumns),
+              SizedBox(height: AppConstants.spaceBetweenColumns(context)),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('날짜 선택'),
-                  SizedBox(height: spaceBetweenElements),
+                  SizedBox(height: AppConstants.spaceBetweenElements(context)),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        minimumSize: Size(buttonWidth, buttonHieght)),
+                        minimumSize: Size(AppConstants.buttonWidth(context), AppConstants.buttonHeight(context))),
                     onPressed: () => _selectDate(context),
                     child: Text(
                       _selectedDate.isNotEmpty
@@ -265,11 +258,11 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                   )
                 ],
               ),
-              SizedBox(height: spaceBetweenColumns),
+              SizedBox(height: AppConstants.spaceBetweenColumns(context)),
               Column(
                 children: [
                   const Text('시간 선택'),
-                  SizedBox(height: spaceBetweenElements),
+                  SizedBox(height: AppConstants.spaceBetweenColumns(context)),
                   ElevatedButton(
                       onPressed: () => _selectTime(context),
                       child: Text(_selectedTime.isNotEmpty
