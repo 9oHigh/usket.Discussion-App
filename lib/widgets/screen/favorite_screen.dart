@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:app_team1/manager/socket_manager.dart';
 import 'package:app_team1/manager/toast_manager.dart';
 import 'package:app_team1/services/api_service.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +33,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
   void initState() {
     super.initState();
     initializeScrollController(_scrollController, _fetchRoomList);
-    _initailizeRoomList();
+    _initializeRoomList();
     _startTimer();
   }
 
@@ -51,11 +52,12 @@ class _FavoriteScreenState extends State<FavoriteScreen>
 
   _reloadRoomList() {
     setState(() {
+      _fetchTopicList();
       _fetchRoomList(isReload: true);
     });
   }
 
-  _initailizeRoomList() async {
+  _initializeRoomList() async {
     await _fetchTopicList();
     await _fetchRoomList(isReload: true);
   }
@@ -71,7 +73,13 @@ class _FavoriteScreenState extends State<FavoriteScreen>
     setState(() {
       _reservedRoomList.removeWhere((room) {
         final DateTime endTime = room.endTime.toLocal();
-        return endTime.isBefore(now);
+        final bool willDisapear = endTime.isBefore(now);
+        if (willDisapear) {
+          SocketManager().exitRoom(
+            room.roomId.toString(),
+          );
+        }
+        return willDisapear;
       });
     });
   }
@@ -162,7 +170,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
             onPressed: () async {
               final isSelected = await context.push("/filter");
               if (isSelected == true) {
-                await _initailizeRoomList();
+                await _initializeRoomList();
               }
             },
             icon: const Icon(Icons.filter_alt),
@@ -196,6 +204,9 @@ class _FavoriteScreenState extends State<FavoriteScreen>
               String endTime = DateFormat('yyyy-MM-dd HH:mm')
                   .format(_reservedRoomList[index].endTime.toLocal());
               bool canParticipate = _canParticipate(index);
+              int roomId = _reservedRoomList[index].roomId;
+              String roomName = _reservedRoomList[index].roomName;
+
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Container(
@@ -232,7 +243,9 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                                           : Colors.grey),
                                   onPressed: () {
                                     if (canParticipate) {
-                                      // MARK: - 채팅방 이동
+                                      SocketManager().joinRoom(roomId);
+                                      context.push(
+                                          '/chat/${roomId.toString()}/$roomName/${_reservedRoomList[index].endTime.toLocal().toIso8601String()}');
                                     } else {
                                       ToastManager().showToast(context,
                                           "아직 참여할 수 없어요.\n시간을 확인해주세요.");
@@ -250,6 +263,11 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                                   onPressed: () {
                                     _updateReservation(index);
                                     _cancelNotification(index);
+                                    SocketManager().exitRoom(
+                                      _reservedRoomList[index]
+                                          .roomId
+                                          .toString(),
+                                    );
                                   },
                                   child: const Text('취소'),
                                 ),

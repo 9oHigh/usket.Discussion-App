@@ -126,30 +126,32 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _scheduleNotification(int index) async {
+    final DateTime now = DateTime.now();
     DateTime startTime = _roomList[index].startTime;
     DateTime notificationTime = startTime.subtract(const Duration(minutes: 1));
 
     tz.TZDateTime scheduledDateTime =
         tz.TZDateTime.from(notificationTime, tz.local);
-
-    await _flutterLocalNotificationsPlugin.zonedSchedule(
-      _roomList[index].roomId,
-      '방 예약 알림',
-      '예약한 방이 1분 뒤에 시작합니다.',
-      scheduledDateTime,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          '방 예약 알림 채널',
-          '방 예약 알림',
-          channelDescription: '방 예약 알림을 위한 채널',
-          importance: Importance.max,
-          priority: Priority.high,
+    if (scheduledDateTime.isBefore(now)) {
+      await _flutterLocalNotificationsPlugin.zonedSchedule(
+        _roomList[index].roomId,
+        '방 예약 알림',
+        '예약한 방이 1분 뒤에 시작합니다.',
+        scheduledDateTime,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            '방 예약 알림 채널',
+            '방 예약 알림',
+            channelDescription: '방 예약 알림을 위한 채널',
+            importance: Importance.max,
+            priority: Priority.high,
+          ),
         ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exact,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-    );
+        androidScheduleMode: AndroidScheduleMode.exact,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    }
   }
 
   @override

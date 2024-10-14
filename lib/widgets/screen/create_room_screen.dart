@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../model/topic/topic.dart';
 import 'package:go_router/go_router.dart';
-import '../../styles/text_button_style.dart';
+import '../styles/text_button_style.dart';
 import '../utils/constants.dart';
 
 enum CreateError {
@@ -72,7 +72,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
       if (playerId == null) {
         throw Exception("등록되지 않은 유저입니다.\n회원가입을 위해 재접속해주세요.");
       }
-      
+
       await _apiService.createRoom(
         _selectedTopicId!,
         _roomNameController.text,
@@ -240,7 +240,8 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                   SizedBox(height: AppConstants.spaceBetweenElements(context)),
                   ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        minimumSize: Size(AppConstants.buttonWidth(context), AppConstants.buttonHeight(context)),
+                        minimumSize: Size(AppConstants.buttonWidth(context),
+                            AppConstants.buttonHeight(context)),
                       ),
                       onPressed: () => _showSubjecSelectDialog(context),
                       child: Text(_selectedTopicName))
@@ -254,7 +255,8 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                   SizedBox(height: AppConstants.spaceBetweenElements(context)),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        minimumSize: Size(AppConstants.buttonWidth(context), AppConstants.buttonHeight(context))),
+                        minimumSize: Size(AppConstants.buttonWidth(context),
+                            AppConstants.buttonHeight(context))),
                     onPressed: () => _selectDate(context),
                     child: Text(
                       _selectedDate.isNotEmpty
