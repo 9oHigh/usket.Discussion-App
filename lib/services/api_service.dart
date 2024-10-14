@@ -13,12 +13,12 @@ import 'end_point/end_point.dart';
 
 class ApiService {
   // Emulator - 10.0.2.2:3000
-  // Device - ifconfig에서 en0에 있는 ip 주소 넣어서 사용 ex) http://127.168.0.23:3000
-  final String baseUrl = "http://192.168.0.23:3000";
+  // Device - ipconfig에서 ip 주소 넣어서 사용 ex) http://127.168.0.23:3000
+  final String _baseUrl = "http://192.168.0.23:3000";
 
   Future<List<TopicCount>> getTopicRoomCounts() async {
     final response =
-        await http.get(Uri.parse("$baseUrl${EndPoint.topicRoomCount.url}"));
+        await http.get(Uri.parse("$_baseUrl${EndPoint.topicRoomCount.url}"));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
@@ -32,7 +32,7 @@ class ApiService {
 
   Future<List<Topic>> getTopicList() async {
     final response =
-        await http.get(Uri.parse("$baseUrl${EndPoint.topicList.url}"));
+        await http.get(Uri.parse("$_baseUrl${EndPoint.topicList.url}"));
 
     if (200 <= response.statusCode && response.statusCode < 299) {
       List<dynamic> jsonList = jsonDecode(response.body);
@@ -47,7 +47,7 @@ class ApiService {
   Future<List<Room>> getRoomList(String? cursorId, int limit) async {
     final int? selectedTopicId = TopicManager().getTopicId;
     final response = await http.post(
-      Uri.parse("$baseUrl${EndPoint.roomList.url}"),
+      Uri.parse("$_baseUrl${EndPoint.roomList.url}"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -87,7 +87,7 @@ class ApiService {
     }
 
     final response =
-        await http.post(Uri.parse("$baseUrl${EndPoint.player.url}"),
+        await http.post(Uri.parse("$_baseUrl${EndPoint.player.url}"),
             headers: <String, String>{
               'Content-Type': 'application/json; charset=UTF-8',
             },
@@ -106,7 +106,7 @@ class ApiService {
   Future<bool> createRoom(int topicId, String roomName, int playerId,
       DateTime startTime, DateTime endTime) async {
     final response = await http.post(
-      Uri.parse("$baseUrl${EndPoint.roomCreate.url}"),
+      Uri.parse("$_baseUrl${EndPoint.roomCreate.url}"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8'
       },
@@ -130,7 +130,7 @@ class ApiService {
 
   Future<bool> deleteRoom(int roomId) async {
     final response = await http.delete(
-      Uri.parse("$baseUrl${EndPoint.deleteRoom.url}"),
+      Uri.parse("$_baseUrl${EndPoint.deleteRoom.url}"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8'
       },
