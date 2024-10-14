@@ -91,7 +91,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
         });
       } catch (e) {
         ToastManager().showToast(context,
-            "[${_reservedRoomList[index].roomName}] 토론방을 취소하지 못했어요.\n다시 시도해주세요.\nERROR: $e");
+            "[${_reservedRoomList[index].roomName}] 토론방을 취소하지 못했어요.\n다시 시도해주세요.");
       }
     } else {
       ToastManager().showToast(
@@ -101,6 +101,14 @@ class _FavoriteScreenState extends State<FavoriteScreen>
         _reservedRoomList.removeAt(index);
       });
     }
+  }
+
+  bool _canParticipate(int index) {
+    final now = DateTime.now();
+    final startTime = _reservedRoomList[index].startTime;
+    final endTime = _reservedRoomList[index].endTime;
+    final bool isStarted = now.isAfter(startTime) && now.isBefore(endTime);
+    return isStarted;
   }
 
   Future<void> _cancelNotification(int index) async {
@@ -187,6 +195,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                   .format(_reservedRoomList[index].startTime.toLocal());
               String endTime = DateFormat('yyyy-MM-dd HH:mm')
                   .format(_reservedRoomList[index].endTime.toLocal());
+              bool canParticipate = _canParticipate(index);
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Container(
@@ -218,8 +227,17 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                               children: [
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.blue[400]),
-                                  onPressed: () {},
+                                      backgroundColor: canParticipate
+                                          ? Colors.blue[400]
+                                          : Colors.grey),
+                                  onPressed: () {
+                                    if (canParticipate) {
+                                      // MARK: - 채팅방 이동
+                                    } else {
+                                      ToastManager().showToast(context,
+                                          "아직 참여할 수 없어요.\n시간을 확인해주세요.");
+                                    }
+                                  },
                                   child: const Text(
                                     '참여',
                                     style: TextStyle(color: Colors.white),
