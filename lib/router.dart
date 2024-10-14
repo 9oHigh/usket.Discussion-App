@@ -1,4 +1,5 @@
 import 'package:app_team1/widgets/page/home_page.dart';
+import 'package:app_team1/widgets/screen/chat_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'widgets/screen/create_room_screen.dart';
@@ -23,5 +24,21 @@ final GoRouter router = GoRouter(
       pageBuilder: (context, state) =>
           const CupertinoPage(child: CreateRoomScreen()),
     ),
+    GoRoute(
+      path: "/chat/:roomId/:roomName/:endTime",
+      pageBuilder: (context, state) {
+        final roomId = state.pathParameters['roomId'] ?? '';
+        final roomName = state.pathParameters['roomName'] ?? '';
+        final endTimeString = state.pathParameters['endTime'] ?? '';
+        final endTime = DateTime.tryParse(endTimeString) ?? DateTime.now();
+        return CupertinoPage(
+          child: ChatScreen(
+            roomId: roomId,
+            roomName: roomName,
+            endTime: endTime,
+          ),
+        );
+      },
+    )
   ],
 );
