@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:app_team1/manager/socket_manager.dart';
 import 'package:app_team1/manager/toast_manager.dart';
 import 'package:app_team1/services/api_service.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +36,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
   void initState() {
     super.initState();
     initializeScrollController(_scrollController, _fetchRoomList);
-    _initailizeRoomList();
+    _initializeRoomList();
     _startTimer();
   }
 
@@ -54,11 +55,12 @@ class _FavoriteScreenState extends State<FavoriteScreen>
 
   _reloadRoomList() {
     setState(() {
+      _fetchTopicList();
       _fetchRoomList(isReload: true);
     });
   }
 
-  _initailizeRoomList() async {
+  _initializeRoomList() async {
     await _fetchTopicList();
     await _fetchRoomList(isReload: true);
   }
@@ -74,7 +76,13 @@ class _FavoriteScreenState extends State<FavoriteScreen>
     setState(() {
       _reservedRoomList.removeWhere((room) {
         final DateTime endTime = room.endTime.toLocal();
-        return endTime.isBefore(now);
+        final bool willDisapear = endTime.isBefore(now);
+        if (willDisapear) {
+          SocketManager().exitRoom(
+            room.roomId.toString(),
+          );
+        }
+        return willDisapear;
       });
     });
   }
@@ -94,7 +102,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
         });
       } catch (e) {
         ToastManager().showToast(context,
-            "[${_reservedRoomList[index].roomName}] 토론방을 취소하지 못했어요.\n다시 시도해주세요.\nERROR: $e");
+            "[${_reservedRoomList[index].roomName}] 토론방을 취소하지 못했어요.\n다시 시도해주세요.");
       }
     } else {
       ToastManager().showToast(
@@ -104,6 +112,14 @@ class _FavoriteScreenState extends State<FavoriteScreen>
         _reservedRoomList.removeAt(index);
       });
     }
+  }
+
+  bool _canParticipate(int index) {
+    final now = DateTime.now();
+    final startTime = _reservedRoomList[index].startTime;
+    final endTime = _reservedRoomList[index].endTime;
+    final bool isStarted = now.isAfter(startTime) && now.isBefore(endTime);
+    return isStarted;
   }
 
   Future<void> _cancelNotification(int index) async {
@@ -157,7 +173,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
             onPressed: () async {
               final isSelected = await context.push("/filter");
               if (isSelected == true) {
-                await _initailizeRoomList();
+                await _initializeRoomList();
               }
             },
             icon: const Icon(Icons.filter_alt,
@@ -171,6 +187,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
           padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
           child: ListView.builder(
             controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
             itemCount: _reservedRoomList.length + 1,
             itemBuilder: (context, index) {
               if (index == _reservedRoomList.length) {
@@ -191,6 +208,10 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                   .format(_reservedRoomList[index].startTime.toLocal());
               String endTime = DateFormat('MM/dd HH:mm')
                   .format(_reservedRoomList[index].endTime.toLocal());
+              bool canParticipate = _canParticipate(index);
+              int roomId = _reservedRoomList[index].roomId;
+              String roomName = _reservedRoomList[index].roomName;
+
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Container(
@@ -235,8 +256,22 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                               children: [
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.primaryColor),
-                                  onPressed: () {},
+                                      backgroundColor: canParticipate
+                                          ? AppColors.primaryColor
+                                          : Colors.grey),
+                                  onPressed: () async {
+                                    if (canParticipate) {
+                                      SocketManager().joinRoom(roomId);
+                                      final timeOver = await context.push(
+                                          '/chat/${roomId.toString()}/$roomName/${_reservedRoomList[index].endTime.toLocal().toIso8601String()}');
+                                      if (timeOver == true) {
+                                        await _initializeRoomList();
+                                      }
+                                    } else {
+                                      ToastManager().showToast(context,
+                                          "아직 참여할 수 없어요.\n시간을 확인해주세요.");
+                                    }
+                                  },
                                   child: const Text(
                                     '참여',
                                     style: TextStyle(
@@ -250,6 +285,11 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                                   onPressed: () {
                                     _updateReservation(index);
                                     _cancelNotification(index);
+                                    SocketManager().exitRoom(
+                                      _reservedRoomList[index]
+                                          .roomId
+                                          .toString(),
+                                    );
                                   },
                                   style: OutlinedButton.styleFrom(
                                     side: const BorderSide(

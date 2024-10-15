@@ -1,3 +1,4 @@
+import 'package:app_team1/manager/socket_manager.dart';
 import 'package:app_team1/manager/topic_manager.dart';
 import 'package:app_team1/model/player.dart';
 import 'package:app_team1/router.dart';
@@ -11,6 +12,7 @@ void main() async {
   tz.initializeTimeZones();
   await _initializeUser();
   await _initializeTopicManager();
+  await _initializeSocketManager();
   runApp(const AppTeam1());
 }
 
@@ -26,6 +28,10 @@ _initializeTopicManager() async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   final int? selectedTopic = prefs.getInt("selectedTopic");
   TopicManager().setTopicId(selectedTopic);
+}
+
+_initializeSocketManager() async {
+  await SocketManager().initSocket();
 }
 
 class AppTeam1 extends StatelessWidget {
