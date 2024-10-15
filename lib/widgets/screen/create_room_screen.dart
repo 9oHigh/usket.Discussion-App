@@ -6,13 +6,12 @@ import '../../services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../model/topic/topic.dart';
-import '../../model/topic/topic_item.dart';
-import '../../model/topic/topic_count.dart';
 import 'package:go_router/go_router.dart';
 
 import '../styles/ui_styles.dart';
 import '../utils/constants.dart';
 import '../app_bar.dart';
+import '../utils/picker.dart';
 
 enum CreateError {
   failCreate,
@@ -51,7 +50,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
   final FocusNode _focusNode = FocusNode();
   final ApiService _apiService = ApiService();
 
-  List<TopicItem> _topicList = [];
+  List<Topic> _topicList = [];
   int? _selectedIndex;
 
   String _selectedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -65,9 +64,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchTopicList().then((_) {
-      _setSelectedTopic();
-    });
+    _fetchTopicList();
   }
 
   Future _updateSelectedDate(DateTime date) async {
@@ -87,32 +84,11 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
   Future<void> _fetchTopicList() async {
     try {
       List<Topic> topicList = await _apiService.getTopicList();
-      List<TopicCount> topicCounts = await _apiService.getTopicRoomCounts();
-      Map<int, String> topicCountMap = {
-        for (var count in topicCounts) count.id: count.count
-      };
-      List<TopicItem> topicItemList = topicList.map((topic) {
-        String count = topicCountMap[topic.id] ?? "0";
-        return TopicItem.fromData(topic.id, topic.name, count);
-      }).toList();
-
       setState(() {
-        _topicList = topicItemList;
+        _topicList = topicList;
       });
-    } catch (e) {
-      ToastManager().showToast(context, "토픽들을 가져오지 못했어요.\n다시 시도해주세요.");
-    }
-  }
-
-  Future<void> _setSelectedTopic() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final int? topicId = prefs.getInt("selectedTopic");
-    final int selectedIndex =
-        _topicList.indexWhere((topic) => topic.id == topicId);
-    if (selectedIndex != -1) {
-      setState(() {
-        _selectedIndex = selectedIndex;
-      });
+    } catch (error) {
+      ToastManager().showToast(context, "주제를 불러오는 데 실패했습니다.");
     }
   }
 
@@ -163,7 +139,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
         appBar: CustomAppBar(
           leading: IconButton(
             icon: const Icon(
-              Icons.arrow_back,
+              Icons.close,
               color: AppColors.appBarContentsColor,
             ),
             onPressed: () => context.pop(),
@@ -208,14 +184,10 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                     children: [
                       SizedBox(
                           height: AppConstants.getScreenHeight(context) * 0.03),
-                      const Text(
-                        '방 제목',
-                        style: TextStyle(
-                            color: AppColors.thirdaryColor,
-                            fontWeight: FontWeight.w600),
-                      ),
+                      const Text('방 제목',
+                          style: SectionTitleStyle.sectionTitleStyle),
                       SizedBox(
-                          height: AppConstants.spaceBetweenElements(context)),
+                          height: AppConstants.spaceSmall(context)),
                       SizedBox(
                         width: AppConstants.textFieldWidth(context),
                         child: Container(
@@ -251,18 +223,14 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                       ),
                     ],
                   ),
-                  SizedBox(height: AppConstants.spaceBetweenColumns(context)),
+                  SizedBox(height: AppConstants.spaceMedium(context)),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Align(
                         alignment: Alignment.topLeft,
-                        child: Text(
-                          '주제 선택',
-                          style: TextStyle(
-                              color: AppColors.thirdaryColor,
-                              fontWeight: FontWeight.w600),
-                        ),
+                        child: Text('주제 선택',
+                            style: SectionTitleStyle.sectionTitleStyle),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 20),
@@ -274,18 +242,19 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                                 ),
                               )
                             : Center(
-                              child: Wrap(
+                                child: Wrap(
                                   alignment: WrapAlignment.center,
-                                  spacing: 10.0,
-                                  runSpacing: 10.0,
+                                  spacing: 12.0,
+                                  runSpacing: 12.0,
                                   children:
                                       List.generate(_topicList.length, (index) {
                                     bool isSelected = _selectedIndex == index;
                                     Color boxColor = isSelected
                                         ? AppColors.thirdaryColor
                                         : Colors.white;
-                                    Color topicNameColor =
-                                        isSelected ? Colors.white : Colors.black;
+                                    Color topicNameColor = isSelected
+                                        ? Colors.white
+                                        : Colors.black;
                                     return GestureDetector(
                                       onTap: () {
                                         setState(() {
@@ -295,12 +264,15 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                                           } else {
                                             _selectedIndex = index;
                                           }
-                                          _selectedTopicId = _topicList[index].id;
+                                          _selectedTopicId =
+                                              _topicList[index].id;
                                         });
                                       },
                                       child: Container(
-                                        width: AppConstants.topicBoxSize(context),
-                                        height: AppConstants.topicBoxSize(context),
+                                        width:
+                                            AppConstants.topicBoxSize(context),
+                                        height:
+                                            AppConstants.topicBoxSize(context),
                                         decoration:
                                             createShadowStyle(color: boxColor),
                                         child: Center(
@@ -332,14 +304,15 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                                                         )) ??
                                                   Container(),
                                               Text(
-                                                topicNameMap[
-                                                        _topicList[index].name] ??
+                                                topicNameMap[_topicList[index]
+                                                        .name] ??
                                                     '기타',
                                                 style: TextStyle(
                                                     color: topicNameColor,
-                                                    fontSize:
-                                                        AppFontSizes.filterTextSize,
-                                                    fontWeight: FontWeight.w500),
+                                                    fontSize: AppFontSizes
+                                                        .filterTextSize,
+                                                    fontWeight:
+                                                        FontWeight.w500),
                                               ),
                                             ],
                                           ),
@@ -348,58 +321,43 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                                     );
                                   }),
                                 ),
-                            ),
+                              ),
                       ),
                     ],
                   ),
-                  SizedBox(height: AppConstants.spaceBetweenColumns(context)),
+                  SizedBox(height: AppConstants.spaceMedium(context)),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text('날짜 선택',
-                          style: TextStyle(
-                            color: AppColors.thirdaryColor,
-                            fontWeight: FontWeight.w600,
-                          )),
+                          style: SectionTitleStyle.sectionTitleStyle),
                       SizedBox(
-                          height: AppConstants.spaceBetweenElements(context)),
+                          height: AppConstants.spaceSmall(context)),
                       Container(
                         decoration: createShadowStyle(),
                         child: CalendarDatePicker(
                           initialDate: _calendarDate,
                           firstDate: DateTime.now(),
-                          lastDate: DateTime.now().add(const Duration(days: 31)),
+                          lastDate:
+                              DateTime.now().add(const Duration(days: 31)),
                           onDateChanged: _updateSelectedDate,
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: AppConstants.spaceBetweenColumns(context)),
+                  SizedBox(height: AppConstants.spaceMedium(context)),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text('시간 선택',
-                          style: TextStyle(
-                            color: AppColors.thirdaryColor,
-                            fontWeight: FontWeight.w600,
-                          )),
+                          style: SectionTitleStyle.sectionTitleStyle),
                       SizedBox(
-                          height: AppConstants.spaceBetweenElements(context)),
+                          height: AppConstants.spaceSmall(context)),
                       Container(
                         decoration: createShadowStyle(),
-                        child: TimePickerSpinner(
-                          is24HourMode: true,
-                          normalTextStyle:
-                              const TextStyle(fontSize: 18, color: Colors.grey),
-                          highlightedTextStyle: const TextStyle(
-                              fontSize: 22, color: AppColors.primaryColor),
-                          spacing: 50,
-                          itemHeight: 50,
-                          isForce2Digits: true,
-                          onTimeChange: (time) {
-                            _updateSelectedTime(time);
-                          },
-                        ),
+                        child: TimePicker(onTimeChange: (time){
+                          _updateSelectedTime(time);
+                        })
                       ),
                     ],
                   ),

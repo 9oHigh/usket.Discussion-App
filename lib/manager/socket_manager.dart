@@ -17,7 +17,7 @@ class SocketManager {
   }
   // Emulator - 10.0.2.2:3001
   // Device - ipconfig에서 ip 주소 넣어서 사용 ex) http://127.168.0.23:3001
-  final String _serverUrl = 'http://192.168.0.23:3001/chat';
+  final String _serverUrl = 'http://192.168.0.16:3001/chat';
   IO.Socket? _socket;
   Map<String, List<Map<String, String>>> chats = {};
   final Map<String, StreamController<List<Map<String, String>>>>

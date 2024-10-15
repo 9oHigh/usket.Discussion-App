@@ -3,6 +3,9 @@ import 'package:app_team1/manager/socket_manager.dart';
 import 'dart:async';
 
 import 'package:go_router/go_router.dart';
+import '../app_bar.dart';
+import '../utils/constants.dart';
+import '../styles/ui_styles.dart';
 
 class ChatScreen extends StatefulWidget {
   final String roomId;
@@ -76,9 +79,16 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(widget.roomName),
+      backgroundColor: AppColors.secondaryColor,
+      appBar: CustomAppBar(
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: AppColors.appBarContentsColor,
+          ),
+          onPressed: () => context.pop(),
+        ),
+        title: widget.roomName,
       ),
       body: Column(
         children: [
@@ -181,28 +191,53 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 20),
+            child: Stack(
               children: [
-                Expanded(
+                Container(
+                  decoration: createShadowStyle(
+                      spreadRadius: 1, offset: const Offset(0, 5)),
                   child: TextField(
                     controller: chatController,
                     decoration: const InputDecoration(
-                      labelText: '보내실 메세지를 입력하세요.',
+                      filled: true,
+                      fillColor: Colors.transparent,
+                      hintText: '보내실 메세지를 입력하세요.',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      border: InputBorder.none,
+                      // focusedBorder: OutlineInputBorder(
+                      //   borderRadius: BorderRadius.circular(20), // 둥근 모서리 설정
+                      //   borderSide: const BorderSide(
+                      //     color: AppColors.primaryColor, // 포커스 시 보더 색상
+                      //     width: 1, // 보더 두께
+                      //   ),
+                      // ),
+                      contentPadding: EdgeInsets.fromLTRB(15, 10, 60, 10),
                     ),
                   ),
                 ),
-                IconButton(
-                  onPressed: () {
-                    socketManager.sendMessage(
-                        int.parse(widget.roomId), chatController.text);
-                    chatController.text = "";
-                  },
-                  icon: const Icon(
-                    Icons.send,
-                    color: Colors.purple,
+                Positioned(
+                  right: 0,
+                  child: IconButton(
+                    onPressed: () {
+                      socketManager.sendMessage(
+                          int.parse(widget.roomId), chatController.text);
+                      chatController.text = "";
+                    },
+                    icon: Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        gradient: AppColors.linearGradient,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.send,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                ),
+                )
               ],
             ),
           ),
