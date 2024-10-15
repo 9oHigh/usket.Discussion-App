@@ -242,11 +242,14 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                                       backgroundColor: canParticipate
                                           ? Colors.blue[400]
                                           : Colors.grey),
-                                  onPressed: () {
+                                  onPressed: () async {
                                     if (canParticipate) {
                                       SocketManager().joinRoom(roomId);
-                                      context.push(
+                                      final timeOver = await context.push(
                                           '/chat/${roomId.toString()}/$roomName/${_reservedRoomList[index].endTime.toLocal().toIso8601String()}');
+                                      if (timeOver == true) {
+                                        await _initializeRoomList();
+                                      }
                                     } else {
                                       ToastManager().showToast(context,
                                           "아직 참여할 수 없어요.\n시간을 확인해주세요.");

@@ -62,7 +62,7 @@ class _ChatScreenState extends State<ChatScreen> {
               child: TextButton(
                 onPressed: () {
                   context.pop();
-                  context.pop();
+                  context.pop(true);
                 },
                 child: const Text("확인"),
               ),
