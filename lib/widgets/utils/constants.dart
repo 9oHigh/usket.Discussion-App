@@ -66,7 +66,7 @@ class AppConstants {
   }
 
   static double topicBoxSize(BuildContext context) {
-    return getScreenHeight(context) * 0.1;
+    return getScreenHeight(context) * 0.09;
   }
 
   static double badgeSize(BuildContext context) {

@@ -102,99 +102,92 @@ class _FilterScreenState extends State<FilterScreen> {
                   style: TextStyle(color: Colors.black),
                 ),
               )
-            : Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Wrap(
-                      alignment: WrapAlignment.center,
-                      spacing: 12.0,
-                      runSpacing: 12.0,
-                      children: List.generate(_topicList.length, (index) {
-                        bool isSelected = _selectedIndex == index;
-                        Color boxColor = isSelected ? AppColors.thirdaryColor : Colors.white;
-                        Color topicNameColor = isSelected ? Colors.white : Colors.black;
-                        Color badgeColor = isSelected ? Colors.white : Colors.blue;
-                        Color badgeTextColor =
-                            isSelected ? Colors.black : Colors.white;
-                        return Stack(
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  if (_selectedIndex != null &&
-                                      _selectedIndex == index) {
-                                    _selectedIndex = null;
-                                  } else {
-                                    _selectedIndex = index;
-                                  }
-                                });
-                              },
-                              child: Container(
-                                width: AppConstants.topicBoxSize(context),
-                                height: AppConstants.topicBoxSize(context),
-                                decoration: createShadowStyle(color: boxColor),
-                                child: Center(
-                                  child: Column(
-                                    children: [
-                                      (_selectedIndex == index
-                                              ? topicImageMap[
-                                                      '${_topicList[index].name}-selected']
-                                                  ?.image(
-                                                  width: AppConstants.filterImageSize(
-                                                      context),
-                                                  height:
-                                                      AppConstants.filterImageSize(
-                                                          context),
-                                                  fit: BoxFit.cover,
-                                                )
-                                              : topicImageMap[_topicList[index].name]
-                                                  ?.image(
-                                                  width: AppConstants.filterImageSize(
-                                                      context),
-                                                  height:
-                                                      AppConstants.filterImageSize(
-                                                          context),
-                                                  fit: BoxFit.cover,
-                                                )) ??
-                                          Container(),
-                                      Text(
-                                        topicNameMap[_topicList[index].name] ?? '기타',
-                                        style: TextStyle(color: topicNameColor, fontSize: AppFontSizes.filterTextSize,
-                                            fontWeight: FontWeight.w500),
-                                      ),
-                                    ],
-                                  ),
+            : Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 12.0,
+                runSpacing: 12.0,
+                children: List.generate(_topicList.length, (index) {
+                  bool isSelected = _selectedIndex == index;
+                  Color boxColor = isSelected ? AppColors.thirdaryColor : Colors.white;
+                  Color topicNameColor = isSelected ? Colors.white : Colors.black;
+                  Color badgeColor = isSelected ? Colors.white : Colors.blue;
+                  Color badgeTextColor =
+                      isSelected ? Colors.black : Colors.white;
+                  return Stack(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            if (_selectedIndex != null &&
+                                _selectedIndex == index) {
+                              _selectedIndex = null;
+                            } else {
+                              _selectedIndex = index;
+                            }
+                          });
+                        },
+                        child: Container(
+                          width: AppConstants.topicBoxSize(context),
+                          height: AppConstants.topicBoxSize(context),
+                          decoration: createShadowStyle(color: boxColor),
+                          child: Center(
+                            child: Column(
+                              children: [
+                                (_selectedIndex == index
+                                        ? topicImageMap[
+                                                '${_topicList[index].name}-selected']
+                                            ?.image(
+                                            width: AppConstants.filterImageSize(
+                                                context),
+                                            height:
+                                                AppConstants.filterImageSize(
+                                                    context),
+                                            fit: BoxFit.cover,
+                                          )
+                                        : topicImageMap[_topicList[index].name]
+                                            ?.image(
+                                            width: AppConstants.filterImageSize(
+                                                context),
+                                            height:
+                                                AppConstants.filterImageSize(
+                                                    context),
+                                            fit: BoxFit.cover,
+                                          )) ??
+                                    Container(),
+                                Text(
+                                  topicNameMap[_topicList[index].name] ?? '기타',
+                                  style: TextStyle(color: topicNameColor, fontSize: AppFontSizes.filterTextSize,
+                                      fontWeight: FontWeight.w500),
                                 ),
-                              ),
+                              ],
                             ),
-                            Positioned(
-                              right: 0,
-                              top: 0,
-                              child: Container(
-                                alignment: Alignment.center,
-                                width: AppConstants.badgeSize(context),
-                                height: AppConstants.badgeSize(context),
-                                decoration: BoxDecoration(
-                                  color: badgeColor,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Text(
-                                  _topicList[index].count,
-                                  style: TextStyle(
-                                    color: badgeTextColor,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Container(
+                          alignment: Alignment.center,
+                          width: AppConstants.badgeSize(context),
+                          height: AppConstants.badgeSize(context),
+                          decoration: BoxDecoration(
+                            color: badgeColor,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            _topicList[index].count,
+                            style: TextStyle(
+                              color: badgeTextColor,
+                              fontWeight: FontWeight.w500,
                             ),
-                          ],
-                        );
-                      }),
-                    ),
-                ),
-              ],
-            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }),
+              ),
       ),
     );
   }

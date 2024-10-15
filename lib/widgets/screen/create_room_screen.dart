@@ -1,10 +1,13 @@
 import 'package:app_team1/manager/toast_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 
 import '../../services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../model/topic/topic.dart';
+import '../../model/topic/topic_item.dart';
+import '../../model/topic/topic_count.dart';
 import 'package:go_router/go_router.dart';
 import '../styles/ui_styles.dart';
 import '../utils/constants.dart';
@@ -47,17 +50,68 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
   final FocusNode _focusNode = FocusNode();
   final ApiService _apiService = ApiService();
 
-  String _selectedDate = '';
-  String _selectedTime = '';
-  int? _selectedTopicId;
-  String _selectedTopicName = '선택하기';
+  List<TopicItem> _topicList = [];
+  int? _selectedIndex;
 
-  Future<List<Topic>> _fetchTopicList() async {
+  String _selectedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  String _selectedTime = '';
+  DateTime _calendarDate = DateTime.now();
+
+  int? _selectedTopicId;
+
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTopicList().then((_) {
+      _setSelectedTopic();
+    });
+  }
+
+  Future _updateSelectedDate(DateTime date) async {
+    setState(() {
+      _calendarDate = date;
+      _selectedDate = DateFormat('yyyy-MM-dd').format(date);
+    });
+  }
+
+  Future _updateSelectedTime(DateTime time) async {
+    setState(() {
+      _selectedTime =
+          '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+    });
+  }
+
+  Future<void> _fetchTopicList() async {
     try {
       List<Topic> topicList = await _apiService.getTopicList();
-      return topicList;
-    } catch (error) {
-      return [];
+      List<TopicCount> topicCounts = await _apiService.getTopicRoomCounts();
+      Map<int, String> topicCountMap = {
+        for (var count in topicCounts) count.id: count.count
+      };
+      List<TopicItem> topicItemList = topicList.map((topic) {
+        String count = topicCountMap[topic.id] ?? "0";
+        return TopicItem.fromData(topic.id, topic.name, count);
+      }).toList();
+
+      setState(() {
+        _topicList = topicItemList;
+      });
+    } catch (e) {
+      ToastManager().showToast(context, "토픽들을 가져오지 못했어요.\n다시 시도해주세요.");
+    }
+  }
+
+  Future<void> _setSelectedTopic() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int? topicId = prefs.getInt("selectedTopic");
+    final int selectedIndex =
+        _topicList.indexWhere((topic) => topic.id == topicId);
+    if (selectedIndex != -1) {
+      setState(() {
+        _selectedIndex = selectedIndex;
+      });
     }
   }
 
@@ -96,86 +150,6 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
     String errorMessage =
         error != null ? "${createError.message} $error" : createError.message;
     ToastManager().showToast(context, errorMessage);
-  }
-
-  _showSubjecSelectDialog(BuildContext context) async {
-    List<Topic> topicList = await _fetchTopicList();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(
-            topicList.isNotEmpty ? "주제를 선택하세요." : "주제가 없어요.",
-            style: const TextStyle(fontSize: 16),
-            textAlign: TextAlign.center,
-          ),
-          // MARK: - Todo
-          // 만약, 토픽이 화면에 모두 담길 수 없다면 카운트가 가장 높은 순으로 8개를 보여주고, 8개를 초과한다면
-          // 하단에 토픽 생성 버튼을 만들어 관련 로직 구현해보기
-          content: Wrap(
-            // Wrap을 사용하면 최대 갯수만큼 집어 넣고 다음 행으로 표시된다.
-            alignment: WrapAlignment.center,
-            children: topicList.isNotEmpty
-                ? topicList.map((topic) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: TextButton(
-                        style: TextButtonStyle.textButtonStyle,
-                        onPressed: () {
-                          setState(() {
-                            _selectedTopicId = topic.id;
-                            _selectedTopicName = topic.name;
-                          });
-                          Navigator.of(context).pop();
-                        },
-                        child: Text(topic.name),
-                      ),
-                    );
-                  }).toList()
-                : [
-                    const Center(
-                      child: Text(
-                        '주제를 생성해주세요.',
-                        style: TextStyle(color: Colors.black),
-                      ),
-                    ),
-                  ],
-          ),
-        );
-      },
-    );
-  }
-
-  Future _selectDate(BuildContext context) async {
-    final DateTime now = DateTime.now();
-    final DateTime lastDate = now.add(const Duration(days: 31));
-    final DateTime? selectedDate = await showDatePicker(
-      context: context,
-      initialDate: now,
-      firstDate: now,
-      lastDate: lastDate,
-    );
-
-    setState(() {
-      _selectedDate = selectedDate != null
-          ? DateFormat('yyyy-MM-dd').format(selectedDate)
-          : "";
-    });
-  }
-
-  Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? selectedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-
-    setState(() {
-      selectedTime != null
-          ? _selectedTime =
-              '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}'
-          : '';
-    });
   }
 
   @override
@@ -220,104 +194,217 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
             ),
           ],
         ),
-        body: Center(
-          child: Column(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        body: Scrollbar(
+          controller: _scrollController,
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
+            child: Center(
+              child: Column(
                 children: [
-                  SizedBox(height: AppConstants.getScreenHeight(context)*0.03),
-                  const Text(
-                    '방 제목',
-                    style: TextStyle(
-                        color: AppColors.thirdaryColor,
-                        fontWeight: FontWeight.w600),
-                  ),
-                  SizedBox(height: AppConstants.spaceBetweenElements(context)),
-                  SizedBox(
-                    width: AppConstants.textFieldWidth(context),
-                    child: Container(
-                      decoration: createShadowStyle(),
-                      child: TextField(
-                        controller: _roomNameController,
-                        focusNode: _focusNode,
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.transparent,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide:
-                                const BorderSide(color: Colors.transparent),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                          height: AppConstants.getScreenHeight(context) * 0.03),
+                      const Text(
+                        '방 제목',
+                        style: TextStyle(
+                            color: AppColors.thirdaryColor,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                          height: AppConstants.spaceBetweenElements(context)),
+                      SizedBox(
+                        width: AppConstants.textFieldWidth(context),
+                        child: Container(
+                          decoration: createShadowStyle(),
+                          child: TextField(
+                            controller: _roomNameController,
+                            focusNode: _focusNode,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.transparent,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                borderSide:
+                                    const BorderSide(color: Colors.transparent),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                borderSide: const BorderSide(
+                                    color: AppColors.primaryColor, width: 2),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                borderSide:
+                                    const BorderSide(color: Colors.transparent),
+                              ),
+                              contentPadding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
+                              hintText: '방 제목을 입력해주세요.',
+                              hintStyle: const TextStyle(color: Colors.grey),
+                            ),
                           ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: const BorderSide(
-                                color: AppColors.primaryColor, width: 2),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide:
-                                const BorderSide(color: Colors.transparent),
-                          ),
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 12),
-                          hintText: '방 제목을 입력해주세요.',
-                          hintStyle: const TextStyle(color: Colors.grey),
                         ),
                       ),
-                    ),
+                    ],
+                  ),
+                  SizedBox(height: AppConstants.spaceBetweenColumns(context)),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Align(
+                        alignment: Alignment.topLeft,
+                        child: Text(
+                          '주제 선택',
+                          style: TextStyle(
+                              color: AppColors.thirdaryColor,
+                              fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20),
+                        child: _topicList.isEmpty
+                            ? const Center(
+                                child: Text(
+                                  '주제를 불러오는 데 실패했습니다.',
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                              )
+                            : Center(
+                              child: Wrap(
+                                  alignment: WrapAlignment.center,
+                                  spacing: 10.0,
+                                  runSpacing: 10.0,
+                                  children:
+                                      List.generate(_topicList.length, (index) {
+                                    bool isSelected = _selectedIndex == index;
+                                    Color boxColor = isSelected
+                                        ? AppColors.thirdaryColor
+                                        : Colors.white;
+                                    Color topicNameColor =
+                                        isSelected ? Colors.white : Colors.black;
+                                    return GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          if (_selectedIndex != null &&
+                                              _selectedIndex == index) {
+                                            _selectedIndex = null;
+                                          } else {
+                                            _selectedIndex = index;
+                                          }
+                                          _selectedTopicId = _topicList[index].id;
+                                        });
+                                      },
+                                      child: Container(
+                                        width: AppConstants.topicBoxSize(context),
+                                        height: AppConstants.topicBoxSize(context),
+                                        decoration:
+                                            createShadowStyle(color: boxColor),
+                                        child: Center(
+                                          child: Column(
+                                            children: [
+                                              (_selectedIndex == index
+                                                      ? topicImageMap[
+                                                              '${_topicList[index].name}-selected']
+                                                          ?.image(
+                                                          width: AppConstants
+                                                              .filterImageSize(
+                                                                  context),
+                                                          height: AppConstants
+                                                              .filterImageSize(
+                                                                  context),
+                                                          fit: BoxFit.cover,
+                                                        )
+                                                      : topicImageMap[
+                                                              _topicList[index]
+                                                                  .name]
+                                                          ?.image(
+                                                          width: AppConstants
+                                                              .filterImageSize(
+                                                                  context),
+                                                          height: AppConstants
+                                                              .filterImageSize(
+                                                                  context),
+                                                          fit: BoxFit.cover,
+                                                        )) ??
+                                                  Container(),
+                                              Text(
+                                                topicNameMap[
+                                                        _topicList[index].name] ??
+                                                    '기타',
+                                                style: TextStyle(
+                                                    color: topicNameColor,
+                                                    fontSize:
+                                                        AppFontSizes.filterTextSize,
+                                                    fontWeight: FontWeight.w500),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                ),
+                            ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: AppConstants.spaceBetweenColumns(context)),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('날짜 선택',
+                          style: TextStyle(
+                            color: AppColors.thirdaryColor,
+                            fontWeight: FontWeight.w600,
+                          )),
+                      SizedBox(
+                          height: AppConstants.spaceBetweenElements(context)),
+                      Container(
+                        decoration: createShadowStyle(),
+                        child: CalendarDatePicker(
+                          initialDate: _calendarDate,
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime.now().add(const Duration(days: 31)),
+                          onDateChanged: _updateSelectedDate,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: AppConstants.spaceBetweenColumns(context)),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('시간 선택',
+                          style: TextStyle(
+                            color: AppColors.thirdaryColor,
+                            fontWeight: FontWeight.w600,
+                          )),
+                      SizedBox(
+                          height: AppConstants.spaceBetweenElements(context)),
+                      Container(
+                        decoration: createShadowStyle(),
+                        child: TimePickerSpinner(
+                          is24HourMode: true,
+                          normalTextStyle:
+                              const TextStyle(fontSize: 18, color: Colors.grey),
+                          highlightedTextStyle: const TextStyle(
+                              fontSize: 22, color: AppColors.primaryColor),
+                          spacing: 50,
+                          itemHeight: 50,
+                          isForce2Digits: true,
+                          onTimeChange: (time) {
+                            _updateSelectedTime(time);
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              SizedBox(height: AppConstants.spaceBetweenColumns(context)),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('주제 선택', style: TextStyle(
-                        color: AppColors.thirdaryColor,
-                        fontWeight: FontWeight.w600),),
-                  SizedBox(height: AppConstants.spaceBetweenElements(context)),
-                  ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(AppConstants.buttonWidth(context),
-                            AppConstants.buttonHeight(context)),
-                      ),
-                      onPressed: () => _showSubjecSelectDialog(context),
-                      child: Text(_selectedTopicName))
-                ],
-              ),
-              SizedBox(height: AppConstants.spaceBetweenColumns(context)),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('날짜 선택'),
-                  SizedBox(height: AppConstants.spaceBetweenElements(context)),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        minimumSize: Size(AppConstants.buttonWidth(context),
-                            AppConstants.buttonHeight(context))),
-                    onPressed: () => _selectDate(context),
-                    child: Text(
-                      _selectedDate.isNotEmpty
-                          ? _selectedDate
-                          : DateFormat('yyyy-MM-dd').format(DateTime.now()),
-                    ),
-                  )
-                ],
-              ),
-              SizedBox(height: AppConstants.spaceBetweenColumns(context)),
-              Column(
-                children: [
-                  const Text('시간 선택'),
-                  SizedBox(height: AppConstants.spaceBetweenColumns(context)),
-                  ElevatedButton(
-                      onPressed: () => _selectTime(context),
-                      child: Text(_selectedTime.isNotEmpty
-                          ? _selectedTime
-                          : TimeOfDay.now().format(context)))
-                ],
-              )
-            ],
+            ),
           ),
         ),
       ),
