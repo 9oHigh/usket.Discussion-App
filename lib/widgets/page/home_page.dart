@@ -1,8 +1,10 @@
 import 'package:app_team1/manager/toast_manager.dart';
 import 'package:app_team1/widgets/screen/favorite_screen.dart';
 import 'package:app_team1/widgets/screen/home_screen.dart';
+import 'package:app_team1/widgets/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../gen/assets.gen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,21 +32,26 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '홈',
+            icon: _selectedIndex == 0
+              ? Assets.images.homeIconFilled.image(width: 24, height: 24)
+              : Assets.images.homeIconOutlined.image(width: 24, height: 24),
+            label: 'HOME',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: '마이',
+            icon: _selectedIndex == 1
+              ? Assets.images.myIconFilled.image(width: 24, height: 24)
+              : Assets.images.myIconOutlined.image(width: 24, height: 24),
+            label: 'MY ROOM',
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: _selectedIndex == 0 ? Colors.purple : Colors.red,
+        selectedItemColor: AppColors.thirdaryColor,
         onTap: _onItemTapped,
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryColor,
         onPressed: () async {
           final isCreated = await context.push('/create_room');
           if (isCreated == true && _selectedIndex == 0) {
@@ -59,7 +66,7 @@ class _HomePageState extends State<HomePage> {
             ToastManager().showToast(context, "방을 만들지 못했습니다.\n다시 시도해주세요.");
           }
         },
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add, color: AppColors.buttonTextColor,),
       ),
     );
   }

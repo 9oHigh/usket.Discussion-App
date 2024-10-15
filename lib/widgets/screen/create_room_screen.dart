@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../model/topic/topic.dart';
 import 'package:go_router/go_router.dart';
-import '../../styles/text_button_style.dart';
+import '../styles/ui_styles.dart';
 import '../utils/constants.dart';
+import '../app_bar.dart';
 
 enum CreateError {
   failCreate,
@@ -72,7 +73,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
       if (playerId == null) {
         throw Exception("등록되지 않은 유저입니다.\n회원가입을 위해 재접속해주세요.");
       }
-      
+
       await _apiService.createRoom(
         _selectedTopicId!,
         _roomNameController.text,
@@ -120,7 +121,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: TextButton(
-                        style: TextButtonStyles.textButtonStyle,
+                        style: TextButtonStyle.textButtonStyle,
                         onPressed: () {
                           setState(() {
                             _selectedTopicId = topic.id;
@@ -183,13 +184,20 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(
+        backgroundColor: AppColors.backgroundColor,
+        appBar: CustomAppBar(
           leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => context.pop()),
+            icon: const Icon(
+              Icons.arrow_back,
+              color: AppColors.appBarContentsColor,
+            ),
+            onPressed: () => context.pop(),
+          ),
+          title: 'CREATE ROOM',
           actions: [
             IconButton(
-              icon: const Icon(Icons.check),
+              icon:
+                  const Icon(Icons.check, color: AppColors.appBarContentsColor),
               onPressed: () {
                 if (_roomNameController.text.isEmpty) {
                   _focusNode.requestFocus();
@@ -218,15 +226,44 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('방 이름'),
+                  SizedBox(height: AppConstants.getScreenHeight(context)*0.03),
+                  const Text(
+                    '방 제목',
+                    style: TextStyle(
+                        color: AppColors.thirdaryColor,
+                        fontWeight: FontWeight.w600),
+                  ),
                   SizedBox(height: AppConstants.spaceBetweenElements(context)),
                   SizedBox(
                     width: AppConstants.textFieldWidth(context),
-                    child: TextField(
-                      controller: _roomNameController,
-                      focusNode: _focusNode,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
+                    child: Container(
+                      decoration: createShadowStyle(),
+                      child: TextField(
+                        controller: _roomNameController,
+                        focusNode: _focusNode,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.transparent,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide:
+                                const BorderSide(color: Colors.transparent),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: const BorderSide(
+                                color: AppColors.primaryColor, width: 2),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide:
+                                const BorderSide(color: Colors.transparent),
+                          ),
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 12),
+                          hintText: '방 제목을 입력해주세요.',
+                          hintStyle: const TextStyle(color: Colors.grey),
+                        ),
                       ),
                     ),
                   ),
@@ -236,11 +273,14 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('주제 선택'),
+                  const Text('주제 선택', style: TextStyle(
+                        color: AppColors.thirdaryColor,
+                        fontWeight: FontWeight.w600),),
                   SizedBox(height: AppConstants.spaceBetweenElements(context)),
                   ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        minimumSize: Size(AppConstants.buttonWidth(context), AppConstants.buttonHeight(context)),
+                        minimumSize: Size(AppConstants.buttonWidth(context),
+                            AppConstants.buttonHeight(context)),
                       ),
                       onPressed: () => _showSubjecSelectDialog(context),
                       child: Text(_selectedTopicName))
@@ -254,7 +294,8 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                   SizedBox(height: AppConstants.spaceBetweenElements(context)),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        minimumSize: Size(AppConstants.buttonWidth(context), AppConstants.buttonHeight(context))),
+                        minimumSize: Size(AppConstants.buttonWidth(context),
+                            AppConstants.buttonHeight(context))),
                     onPressed: () => _selectDate(context),
                     child: Text(
                       _selectedDate.isNotEmpty
