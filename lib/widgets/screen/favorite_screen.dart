@@ -183,6 +183,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
           padding: const EdgeInsets.all(8),
           child: ListView.builder(
             controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
             itemCount: _reservedRoomList.length + 1,
             itemBuilder: (context, index) {
               if (index == _reservedRoomList.length) {

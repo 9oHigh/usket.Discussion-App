@@ -178,6 +178,7 @@ class _HomeScreenState extends State<HomeScreen>
           padding: const EdgeInsets.all(8),
           child: ListView.builder(
             controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
             itemCount: _roomList.length + 1,
             itemBuilder: (context, index) {
               if (index == _roomList.length) {
