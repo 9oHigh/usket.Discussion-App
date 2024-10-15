@@ -1,6 +1,7 @@
 import 'package:app_team1/model/room.dart';
 import 'package:app_team1/model/topic/topic.dart';
 import 'package:app_team1/services/api_service.dart';
+import 'package:app_team1/widgets/utils/constants.dart';
 import 'package:app_team1/widgets/utils/infinite_scroll_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +11,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import '../../manager/toast_manager.dart';
+import '../app_bar.dart';
+import '../styles/ui_styles.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -100,7 +103,9 @@ class _HomeScreenState extends State<HomeScreen>
       _roomList = _roomList
           .where((room) => !room.isReserved && now.isBefore(room.startTime))
           .toList();
-      cursorId = _roomList.last.roomId.toString();
+      if (_roomList.isNotEmpty) {
+        cursorId = _roomList.last.roomId.toString();
+      }
       if (mounted) setState(() {});
     } else {
       final toBeAddedRooms = await _apiService.getRoomList(cursorId, 10);
@@ -111,7 +116,9 @@ class _HomeScreenState extends State<HomeScreen>
         _roomList = _roomList
             .where((room) => !room.isReserved && now.isBefore(room.startTime))
             .toList();
-        cursorId = _roomList.last.roomId.toString();
+        if (_roomList.isNotEmpty) {
+          cursorId = _roomList.last.roomId.toString();
+        }
       }
     }
   }
@@ -155,9 +162,9 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('방 목록'),
-        centerTitle: true,
+      backgroundColor: AppColors.backgroundColor,
+      appBar: CustomAppBar(
+        title: 'ROOM LIST',
         actions: [
           IconButton(
             onPressed: () async {
@@ -166,14 +173,15 @@ class _HomeScreenState extends State<HomeScreen>
                 await _initializeRoomList();
               }
             },
-            icon: const Icon(Icons.filter_alt),
+            icon: const Icon(Icons.filter_alt,
+                color: AppColors.appBarContentsColor),
           ),
         ],
       ),
       body: RefreshIndicator(
         onRefresh: () => _fetchRoomList(isReload: true),
         child: Padding(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
           child: ListView.builder(
             controller: _scrollController,
             itemCount: _roomList.length + 1,
@@ -191,48 +199,116 @@ class _HomeScreenState extends State<HomeScreen>
               String topicName = _topicList
                   .firstWhere((topic) => topic.id == _roomList[index].topicId)
                   .name;
-              String startTime = DateFormat('yyyy-MM-dd HH:mm')
+              String startTime = DateFormat('MM/dd HH:mm')
                   .format(_roomList[index].startTime.toLocal());
-              String endTime = DateFormat('yyyy-MM-dd HH:mm')
+              String endTime = DateFormat('MM/dd HH:mm')
                   .format(_roomList[index].endTime.toLocal());
-
               return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
+                key: ValueKey(_roomList[index].roomId),
+                padding: const EdgeInsets.only(bottom: 12),
                 child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey,
-                      width: 0.5,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                  decoration: createShadowStyle(),
                   child: Padding(
-                    key: ValueKey(_roomList[index].roomId),
                     padding: const EdgeInsets.all(10.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("주제: $topicName"),
-                        const SizedBox(height: 4),
-                        Text("방이름: ${_roomList[index].roomName}"),
-                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            topicImageMap[topicName]?.image(
+                                  width: AppConstants.listImageSize(context),
+                                  height: AppConstants.listImageSize(context),
+                                  fit: BoxFit.cover,
+                                ) ??
+                                Container(),
+                            const SizedBox(
+                              width: 8,
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(topicNameMap[topicName] ?? topicName,
+                                    style: const TextStyle(
+                                        fontSize: AppFontSizes.topicTextSize,
+                                        fontWeight: FontWeight.w600)),
+                                const SizedBox(
+                                  height: 4,
+                                ),
+                                Text(_roomList[index].roomName,
+                                    style: const TextStyle(
+                                      fontSize: AppFontSizes.titleTextSize,
+                                    )),
+                              ],
+                            ),
+                          ],
+                        ),
                         Align(
                           alignment: Alignment.centerRight,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              await _scheduleNotification(index);
-                              await _makeReservation(index);
-                            },
-                            child: const Text('예약'),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              OutlinedButton(
+                                onPressed: () async {
+                                  await _scheduleNotification(index);
+                                  await _makeReservation(index);
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  side: const BorderSide(
+                                    color: AppColors.primaryColor,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: const Text('예약',
+                                    style:
+                                        TextStyle(color: AppColors.primaryColor)),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(
                           height: 4,
                         ),
-                        Text("시작: $startTime"),
-                        const SizedBox(height: 4),
-                        Text("종료: $endTime"),
-                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Text("시작",
+                                style: TextStyle(
+                                    fontSize: AppFontSizes.timeTextSize,
+                                    fontWeight: FontWeight.w500)),
+                            const SizedBox(
+                              width: 4,
+                            ),
+                            Text(startTime,
+                                style: const TextStyle(
+                                    fontSize: AppFontSizes.timeTextSize,
+                                    color: AppColors.thirdaryColor,
+                                    fontWeight: FontWeight.w500)),
+                            const SizedBox(
+                              width: 8,
+                            ),
+                            Container(
+                              width: 1,
+                              height: 10,
+                              color: AppColors.thirdaryColor,
+                            ),
+                            const SizedBox(
+                              width: 8,
+                            ),
+                            const Text("종료",
+                                style: TextStyle(
+                                    fontSize: AppFontSizes.timeTextSize,
+                                    fontWeight: FontWeight.w500)),
+                            const SizedBox(
+                              width: 4,
+                            ),
+                            Text(endTime,
+                                style: const TextStyle(
+                                    fontSize: AppFontSizes.timeTextSize,
+                                    color: AppColors.thirdaryColor,
+                                    fontWeight: FontWeight.w500)),
+                          ],
+                        ),
                       ],
                     ),
                   ),
