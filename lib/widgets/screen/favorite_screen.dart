@@ -228,22 +228,29 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                             const SizedBox(
                               width: 8,
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(topicNameMap[topicName] ?? topicName,
-                                    style: const TextStyle(
-                                        fontSize: AppFontSize.topicTextSize,
-                                        fontWeight: FontWeight.w600)),
-                                const SizedBox(
-                                  height: 4,
-                                ),
-                                Text(_reservedRooms[index].roomName,
-                                    style: const TextStyle(
-                                        fontSize: AppFontSize.titleTextSize,
-                                        fontFamily:
-                                            FontFamily.spoqaHanSansNeo)),
-                              ],
+                            Flexible(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(topicNameMap[topicName] ?? topicName,
+                                      style: const TextStyle(
+                                          fontSize: AppFontSize.topicTextSize,
+                                          fontWeight: FontWeight.w600)),
+                                  const SizedBox(
+                                    height: 4,
+                                  ),
+                                  Container(
+                                      padding: const EdgeInsets.all(2.0),
+                                      child: Text(
+                                          overflow: TextOverflow.ellipsis,
+                                          _reservedRooms[index].roomName,
+                                          style: const TextStyle(
+                                              fontSize:
+                                                  AppFontSize.titleTextSize,
+                                              fontFamily:
+                                                  FontFamily.spoqaHanSansNeo))),
+                                ],
+                              ),
                             ),
                           ],
                         ),

@@ -225,22 +225,24 @@ class _HomeScreenState extends State<HomeScreen>
                             const SizedBox(
                               width: 8,
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(topicNameMap[topicName] ?? topicName,
-                                    style: const TextStyle(
-                                        fontSize: AppFontSize.topicTextSize,
-                                        fontWeight: FontWeight.w600)),
-                                const SizedBox(
-                                  height: 4,
-                                ),
-                                Text(_roomList[index].roomName,
-                                    style: const TextStyle(
-                                        fontSize: AppFontSize.titleTextSize,
-                                        fontFamily:
-                                            FontFamily.spoqaHanSansNeo)),
-                              ],
+                            Flexible(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(topicNameMap[topicName] ?? topicName,
+                                      style: const TextStyle(
+                                          fontSize: AppFontSize.topicTextSize,
+                                          fontWeight: FontWeight.w600)),
+                                  const SizedBox(
+                                    height: 4,
+                                  ),
+                                  Text(_roomList[index].roomName,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: AppFontSize.titleTextSize, fontFamily: FontFamily.spoqaHanSansNeo
+                                      )),
+                                ],
+                              ),
                             ),
                           ],
                         ),
