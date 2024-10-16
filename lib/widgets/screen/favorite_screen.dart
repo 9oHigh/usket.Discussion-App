@@ -34,8 +34,6 @@ class _FavoriteScreenState extends State<FavoriteScreen>
 
   final ApiService _apiService = ApiService();
   final ScrollController _scrollController = ScrollController();
-  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
 
   @override
   void initState() {
