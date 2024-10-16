@@ -243,7 +243,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                                 ),
                               )
                             : SizedBox(
-                                height: 160,
+                                height: 180,
                                 child: SingleChildScrollView(
                                   child: GridView.builder(
                                     shrinkWrap: true,
