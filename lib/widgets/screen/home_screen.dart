@@ -13,6 +13,7 @@ import 'package:timezone/timezone.dart' as tz;
 import '../../manager/toast_manager.dart';
 import '../app_bar.dart';
 import '../styles/ui_styles.dart';
+import '../../gen/fonts.gen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -241,7 +242,7 @@ class _HomeScreenState extends State<HomeScreen>
                                 ),
                                 Text(_roomList[index].roomName,
                                     style: const TextStyle(
-                                      fontSize: AppFontSizes.titleTextSize,
+                                      fontSize: AppFontSizes.titleTextSize, fontFamily: FontFamily.spoqaHanSansNeo
                                     )),
                               ],
                             ),
