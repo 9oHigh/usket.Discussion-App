@@ -103,7 +103,7 @@ flutter:
 
     - family: SpoqaHanSansNeo
       fonts:
-        - asset: fonts/SpoqaHanSansNeo-Regualr.ttf
+        - asset: assets/fonts/SpoqaHanSansNeo-Regualr.ttf
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
