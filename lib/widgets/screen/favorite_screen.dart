@@ -173,6 +173,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
         ],
       ),
       body: RefreshIndicator(
+        color: AppColor.primaryColor,
         onRefresh: () => _fetchRoomList(isReload: true),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
@@ -186,7 +187,9 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                     ? const Center(
                         child: Padding(
                           padding: EdgeInsets.all(8.0),
-                          child: CircularProgressIndicator(),
+                          child: CircularProgressIndicator(
+                            color: AppColor.primaryColor,
+                          ),
                         ),
                       )
                     : const SizedBox.shrink();
