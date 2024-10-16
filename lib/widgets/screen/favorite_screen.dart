@@ -8,12 +8,15 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../model/room.dart';
 import 'package:app_team1/model/topic/topic.dart';
-import '../../widgets/utils/infinite_scroll_mixin.dart';
+import '../custom/style/shadow_style.dart';
+import '../utils/app_color.dart';
+import '../utils/app_constant.dart';
+import '../utils/app_font_size.dart';
+import '../utils/mixin/infinite_scroll_mixin.dart';
 import 'package:intl/intl.dart';
-import '../app_bar.dart';
-import '../utils/constants.dart';
-import '../styles/ui_styles.dart';
+import '../custom/widget/app_bar.dart';
 import '../../gen/fonts.gen.dart';
+import '../utils/topic_mapped.dart';
 
 class FavoriteScreen extends StatefulWidget {
   const FavoriteScreen({super.key});
@@ -24,7 +27,7 @@ class FavoriteScreen extends StatefulWidget {
 
 class _FavoriteScreenState extends State<FavoriteScreen>
     with InfiniteScrollMixin<FavoriteScreen> {
-  List<Room> _reservedRoomList = [];
+  List<Room> _reservedRooms = [];
   List<Topic> _topicList = [];
   Timer? _timer;
 
@@ -38,7 +41,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
     super.initState();
     initializeScrollController(_scrollController, _fetchRoomList);
     _initializeRoomList();
-    _startTimer();
+    _startRoomExpirationTimer();
   }
 
   @override
@@ -61,71 +64,9 @@ class _FavoriteScreenState extends State<FavoriteScreen>
     });
   }
 
-  _initializeRoomList() async {
+  Future<void> _initializeRoomList() async {
     await _fetchTopicList();
     await _fetchRoomList(isReload: true);
-  }
-
-  _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
-      _checkExpiredRooms();
-    });
-  }
-
-  _checkExpiredRooms() {
-    final now = DateTime.now();
-    setState(() {
-      _reservedRoomList.removeWhere((room) {
-        final DateTime endTime = room.endTime.toLocal();
-        final bool willDisapear = endTime.isBefore(now);
-        if (willDisapear) {
-          SocketManager().exitRoom(
-            room.roomId.toString(),
-          );
-        }
-        return willDisapear;
-      });
-    });
-  }
-
-  _updateReservation(int index) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final int playerId = prefs.getInt("playerId") ?? 0;
-    final int roomId = _reservedRoomList[index].roomId;
-
-    if (_reservedRoomList[index].playerId == playerId) {
-      try {
-        await _apiService.deleteRoom(roomId);
-        ToastManager().showToast(
-            context, "[${_reservedRoomList[index].roomName}] 토론방을 취소했습니다.");
-        setState(() {
-          _fetchRoomList(isReload: true);
-        });
-      } catch (e) {
-        ToastManager().showToast(context,
-            "[${_reservedRoomList[index].roomName}] 토론방을 취소하지 못했어요.\n다시 시도해주세요.");
-      }
-    } else {
-      ToastManager().showToast(
-          context, "[${_reservedRoomList[index].roomName}] 토론방을 취소했습니다.");
-      setState(() {
-        _reservedRoomList[index].saveIsReserved(false);
-        _reservedRoomList.removeAt(index);
-      });
-    }
-  }
-
-  bool _canParticipate(int index) {
-    final now = DateTime.now();
-    final startTime = _reservedRoomList[index].startTime;
-    final endTime = _reservedRoomList[index].endTime;
-    final bool isStarted = now.isAfter(startTime) && now.isBefore(endTime);
-    return isStarted;
-  }
-
-  Future<void> _cancelNotification(int index) async {
-    int notificationId = _reservedRoomList[index].roomId;
-    await _flutterLocalNotificationsPlugin.cancel(notificationId);
   }
 
   Future<void> _fetchTopicList() async {
@@ -133,40 +74,89 @@ class _FavoriteScreenState extends State<FavoriteScreen>
     if (mounted) setState(() {});
   }
 
-  Future<void> _fetchRoomList({bool? isReload}) async {
+  Future<void> _fetchRoomList({bool isReload = false}) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final int playerId = prefs.getInt("playerId") ?? 0;
+    List<Room> fetchedRooms =
+        await _apiService.getRoomList(isReload ? null : cursorId, 10);
 
-    if (isReload != null && isReload) {
-      _reservedRoomList = await _apiService.getRoomList(null, 10);
-      _reservedRoomList = _reservedRoomList
-          .where((room) => room.isReserved || room.playerId == playerId)
-          .map((room) => Room.toReservedRoom(room))
-          .toList();
-      if (_reservedRoomList.isNotEmpty) {
-        cursorId = _reservedRoomList.last.roomId.toString();
-      }
-      if (mounted) setState(() {});
-    } else {
-      final toBeAddedRooms = await _apiService.getRoomList(cursorId, 10);
-      if (toBeAddedRooms.isEmpty) {
-        return;
-      } else {
-        _reservedRoomList += toBeAddedRooms;
-        _reservedRoomList = _reservedRoomList
-            .where((room) => room.isReserved || room.playerId == playerId)
-            .toList();
-        if (_reservedRoomList.isNotEmpty) {
-          cursorId = _reservedRoomList.last.roomId.toString();
+    if (fetchedRooms.isEmpty) return;
+
+    List<Room> filteredRooms = fetchedRooms
+        .where((room) => room.isReserved || room.playerId == playerId)
+        .map((room) => Room.toReservedRoom(room))
+        .toList();
+    _reservedRooms = isReload ? filteredRooms : _reservedRooms += filteredRooms;
+    cursorId = _reservedRooms.isNotEmpty
+        ? _reservedRooms.last.roomId.toString()
+        : null;
+
+    if (mounted && isReload) setState(() {});
+  }
+
+  _startRoomExpirationTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      _removeExpiredRooms();
+    });
+  }
+
+  _removeExpiredRooms() {
+    final now = DateTime.now();
+    setState(() {
+      _reservedRooms.removeWhere((room) {
+        final DateTime endTime = room.endTime.toLocal();
+        final bool isExpired = endTime.isBefore(now);
+        if (isExpired) {
+          SocketManager().exitRoom(room.roomId.toString());
         }
+        return isExpired;
+      });
+    });
+  }
+
+  _updateReservation(int index) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int playerId = prefs.getInt("playerId") ?? 0;
+    final int roomId = _reservedRooms[index].roomId;
+
+    if (_reservedRooms[index].playerId == playerId) {
+      try {
+        await _apiService.deleteRoom(roomId);
+        ToastManager().showToast(
+            context, "[${_reservedRooms[index].roomName}] 토론방을 취소했습니다.");
+        setState(() {
+          _fetchRoomList(isReload: true);
+        });
+      } catch (e) {
+        ToastManager().showToast(context,
+            "[${_reservedRooms[index].roomName}] 토론방을 취소하지 못했어요.\n다시 시도해주세요.");
       }
+    } else {
+      ToastManager().showToast(
+          context, "[${_reservedRooms[index].roomName}] 토론방을 취소했습니다.");
+      setState(() {
+        _reservedRooms[index].saveIsReserved(false);
+        _reservedRooms.removeAt(index);
+      });
     }
+  }
+
+  bool _canParticipate(int index) {
+    final now = DateTime.now();
+    final startTime = _reservedRooms[index].startTime;
+    final endTime = _reservedRooms[index].endTime;
+    return now.isAfter(startTime) && now.isBefore(endTime);
+  }
+
+  Future<void> _cancelNotification(int index) async {
+    int notificationId = _reservedRooms[index].roomId;
+    await _flutterLocalNotificationsPlugin.cancel(notificationId);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: AppColor.backgroundColor,
       appBar: CustomAppBar(
         title: 'MY ROOM LIST',
         actions: [
@@ -178,7 +168,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
               }
             },
             icon: const Icon(Icons.filter_alt,
-                color: AppColors.appBarContentsColor),
+                color: AppColor.appBarContentsColor),
           ),
         ],
       ),
@@ -189,9 +179,9 @@ class _FavoriteScreenState extends State<FavoriteScreen>
           child: ListView.builder(
             controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
-            itemCount: _reservedRoomList.length + 1,
+            itemCount: _reservedRooms.length + 1,
             itemBuilder: (context, index) {
-              if (index == _reservedRoomList.length) {
+              if (index == _reservedRooms.length) {
                 return isLoading
                     ? const Center(
                         child: Padding(
@@ -203,20 +193,21 @@ class _FavoriteScreenState extends State<FavoriteScreen>
               }
               String topicName = _topicList
                   .firstWhere(
-                      (topic) => topic.id == _reservedRoomList[index].topicId)
+                      (topic) => topic.id == _reservedRooms[index].topicId)
                   .name;
               String startTime = DateFormat('MM/dd HH:mm')
-                  .format(_reservedRoomList[index].startTime.toLocal());
+                  .format(_reservedRooms[index].startTime.toLocal());
               String endTime = DateFormat('MM/dd HH:mm')
-                  .format(_reservedRoomList[index].endTime.toLocal());
+                  .format(_reservedRooms[index].endTime.toLocal());
               bool canParticipate = _canParticipate(index);
-              int roomId = _reservedRoomList[index].roomId;
-              String roomName = _reservedRoomList[index].roomName;
+              int roomId = _reservedRooms[index].roomId;
+              String roomName = _reservedRooms[index].roomName;
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                   decoration: createShadowStyle(),
                   child: Padding(
                     padding: const EdgeInsets.all(10.0),
@@ -226,8 +217,8 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                         Row(
                           children: [
                             topicImageMap[topicName]?.image(
-                                  width: AppConstants.listImageSize(context),
-                                  height: AppConstants.listImageSize(context),
+                                  width: AppConstant.listImageSize(context),
+                                  height: AppConstant.listImageSize(context),
                                   fit: BoxFit.cover,
                                 ) ??
                                 Container(),
@@ -239,17 +230,21 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                               children: [
                                 Text(topicNameMap[topicName] ?? topicName,
                                     style: const TextStyle(
-                                        fontSize: AppFontSizes.topicTextSize,
+                                        fontSize: AppFontSize.topicTextSize,
                                         fontWeight: FontWeight.w600)),
                                 const SizedBox(
                                   height: 4,
                                 ),
-                                Text(_reservedRoomList[index].roomName, style: const TextStyle(fontSize: AppFontSizes.titleTextSize, fontFamily: FontFamily.spoqaHanSansNeo)),
+                                Text(_reservedRooms[index].roomName,
+                                    style: const TextStyle(
+                                        fontSize: AppFontSize.titleTextSize,
+                                        fontFamily:
+                                            FontFamily.spoqaHanSansNeo)),
                               ],
                             ),
                           ],
                         ),
-                        if (_reservedRoomList[index].isReserved) ...{
+                        if (_reservedRooms[index].isReserved) ...{
                           Align(
                             alignment: Alignment.centerRight,
                             child: Row(
@@ -258,13 +253,13 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
                                       backgroundColor: canParticipate
-                                          ? AppColors.primaryColor
+                                          ? AppColor.primaryColor
                                           : Colors.grey),
                                   onPressed: () async {
                                     if (canParticipate) {
                                       SocketManager().joinRoom(roomId);
                                       final timeOver = await context.push(
-                                          '/chat/${roomId.toString()}/$roomName/${_reservedRoomList[index].endTime.toLocal().toIso8601String()}');
+                                          '/chat/${roomId.toString()}/$roomName/${_reservedRooms[index].endTime.toLocal().toIso8601String()}');
                                       if (timeOver == true) {
                                         await _initializeRoomList();
                                       }
@@ -276,7 +271,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                                   child: const Text(
                                     '참여',
                                     style: TextStyle(
-                                        color: AppColors.buttonTextColor),
+                                        color: AppColor.buttonTextColor),
                                   ),
                                 ),
                                 const SizedBox(
@@ -287,18 +282,18 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                                     _updateReservation(index);
                                     _cancelNotification(index);
                                     SocketManager().exitRoom(
-                                      _reservedRoomList[index]
-                                          .roomId
-                                          .toString(),
+                                      _reservedRooms[index].roomId.toString(),
                                     );
                                   },
                                   style: OutlinedButton.styleFrom(
                                     side: const BorderSide(
-                                      color: AppColors.primaryColor,
-                                      width: 1, // 테두리 두께
+                                      color: AppColor.primaryColor,
+                                      width: 1,
                                     ),
                                   ),
-                                  child: const Text('취소', style: TextStyle(color: AppColors.primaryColor)),
+                                  child: const Text('취소',
+                                      style: TextStyle(
+                                          color: AppColor.primaryColor)),
                                 ),
                               ],
                             ),
@@ -322,15 +317,15 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                           children: [
                             const Text("시작",
                                 style: TextStyle(
-                                    fontSize: AppFontSizes.timeTextSize,
+                                    fontSize: AppFontSize.timeTextSize,
                                     fontWeight: FontWeight.w500)),
                             const SizedBox(
                               width: 4,
                             ),
                             Text(startTime,
                                 style: const TextStyle(
-                                    fontSize: AppFontSizes.timeTextSize,
-                                    color: AppColors.thirdaryColor,
+                                    fontSize: AppFontSize.timeTextSize,
+                                    color: AppColor.thirdaryColor,
                                     fontWeight: FontWeight.w500)),
                             const SizedBox(
                               width: 8,
@@ -338,22 +333,22 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                             Container(
                               width: 1,
                               height: 10,
-                              color: AppColors.thirdaryColor,
+                              color: AppColor.thirdaryColor,
                             ),
                             const SizedBox(
                               width: 8,
                             ),
                             const Text("종료",
                                 style: TextStyle(
-                                    fontSize: AppFontSizes.timeTextSize,
+                                    fontSize: AppFontSize.timeTextSize,
                                     fontWeight: FontWeight.w500)),
                             const SizedBox(
                               width: 4,
                             ),
                             Text(endTime,
                                 style: const TextStyle(
-                                    fontSize: AppFontSizes.timeTextSize,
-                                    color: AppColors.thirdaryColor,
+                                    fontSize: AppFontSize.timeTextSize,
+                                    color: AppColor.thirdaryColor,
                                     fontWeight: FontWeight.w500)),
                           ],
                         ),

@@ -1,23 +1,24 @@
+import 'package:app_team1/widgets/custom/style/shadow_style.dart';
+import 'package:app_team1/widgets/utils/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:app_team1/manager/socket_manager.dart';
 import 'dart:async';
-
 import 'package:go_router/go_router.dart';
-import '../app_bar.dart';
-import '../utils/constants.dart';
-import '../styles/ui_styles.dart';
+import '../custom/widget/app_bar.dart';
 
 class ChatScreen extends StatefulWidget {
-  final String roomId;
-  final String roomName;
-  final DateTime endTime;
+  final String _roomId;
+  final String _roomName;
+  final DateTime _endTime;
 
   const ChatScreen({
     super.key,
-    required this.roomId,
-    required this.roomName,
-    required this.endTime,
-  });
+    required String roomId,
+    required String roomName,
+    required DateTime endTime,
+  })  : _roomId = roomId,
+        _roomName = roomName,
+        _endTime = endTime;
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -31,15 +32,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(
-      const Duration(seconds: 1),
-      (timer) {
-        if (DateTime.now().isAfter(widget.endTime)) {
-          _showEndTimeAlert();
-          _timer?.cancel();
-        }
-      },
-    );
+    _startEndTimeTimer();
   }
 
   @override
@@ -47,6 +40,18 @@ class _ChatScreenState extends State<ChatScreen> {
     _timer?.cancel();
     chatController.dispose();
     super.dispose();
+  }
+
+  _startEndTimeTimer() {
+    _timer = Timer.periodic(
+      const Duration(seconds: 1),
+      (timer) {
+        if (DateTime.now().isAfter(widget._endTime)) {
+          _showEndTimeAlert();
+          _timer?.cancel();
+        }
+      },
+    );
   }
 
   _showEndTimeAlert() {
@@ -81,23 +86,23 @@ class _ChatScreenState extends State<ChatScreen> {
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
-        backgroundColor: AppColors.secondaryColor,
+        backgroundColor: AppColor.secondaryColor,
         appBar: CustomAppBar(
           leading: IconButton(
             icon: const Icon(
               Icons.arrow_back,
-              color: AppColors.appBarContentsColor,
+              color: AppColor.appBarContentsColor,
             ),
             onPressed: () => context.pop(),
           ),
-          title: widget.roomName,
+          title: widget._roomName,
         ),
         body: Column(
           children: [
             Expanded(
               child: StreamBuilder<List<Map<String, String>>>(
-                stream: socketManager.getChatStream(widget.roomId),
-                initialData: socketManager.chats[widget.roomId],
+                stream: socketManager.getChatStream(widget._roomId),
+                initialData: socketManager.chats[widget._roomId],
                 builder: (context, snapshot) {
                   var reversedMessages = snapshot.data?.reversed.toList() ?? [];
                   if (reversedMessages.isEmpty) {
@@ -167,22 +172,20 @@ class _ChatScreenState extends State<ChatScreen> {
                                         vertical: 5, horizontal: 10),
                                     decoration: BoxDecoration(
                                       color: isMe
-                                          ? AppColors.primaryColor
+                                          ? AppColor.primaryColor
                                           : Colors.white,
                                       borderRadius: isMe
                                           ? const BorderRadius.only(
                                               topLeft: Radius.circular(15),
                                               topRight: Radius.circular(15),
                                               bottomLeft: Radius.circular(15),
-                                              bottomRight:
-                                                  Radius.zero,
+                                              bottomRight: Radius.zero,
                                             )
                                           : const BorderRadius.only(
                                               topLeft: Radius.circular(15),
                                               topRight: Radius.circular(15),
                                               bottomLeft: Radius.zero,
-                                              bottomRight: Radius.circular(
-                                                  15),
+                                              bottomRight: Radius.circular(15),
                                             ),
                                     ),
                                     child: Column(
@@ -233,8 +236,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(25),
                           borderSide: const BorderSide(
-                            color: AppColors.primaryColor,
-                            width: 1, 
+                            color: AppColor.primaryColor,
+                            width: 1,
                           ),
                         ),
                         contentPadding:
@@ -248,14 +251,14 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: IconButton(
                       onPressed: () {
                         socketManager.sendMessage(
-                            int.parse(widget.roomId), chatController.text);
+                            int.parse(widget._roomId), chatController.text);
                         chatController.text = "";
                       },
                       icon: Container(
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: AppColors.primaryColor,
+                          color: AppColor.primaryColor,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Icon(

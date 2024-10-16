@@ -5,8 +5,6 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class SocketManager {
   static final SocketManager _instance = SocketManager._internal();
-  late SharedPreferences prefs;
-  late int playerId;
 
   factory SocketManager() {
     return _instance;
@@ -17,9 +15,14 @@ class SocketManager {
   }
   // Emulator - 10.0.2.2:3001
   // Device - ipconfig에서 ip 주소 넣어서 사용 ex) http://127.168.0.23:3001
-  final String _serverUrl = 'http://192.168.0.16:3001/chat';
+  final String _serverUrl = 'http://192.168.0.23:3001/chat';
   IO.Socket? _socket;
+
+  late SharedPreferences prefs;
+  late int playerId;
+
   Map<String, List<Map<String, String>>> chats = {};
+
   final Map<String, StreamController<List<Map<String, String>>>>
       _chatStreamControllers = {};
   final Map<String, StreamController<bool>> _exitControllers = {};
@@ -73,13 +76,9 @@ class SocketManager {
   }
 
   Future<void> _addListener() async {
-    _socket?.onConnect((_) {
-      print("Connected to $_serverUrl");
-    });
+    _socket?.onConnect((_) {});
 
-    _socket?.onDisconnect((_) {
-      print("Disconnected from $_serverUrl");
-    });
+    _socket?.onDisconnect((_) {});
 
     _socket?.on('join', (data) {
       List<String> chatRoomIds = prefs.getStringList('chatRoomIds') ?? [];
@@ -163,10 +162,8 @@ class SocketManager {
     if (!chats.containsKey(roomId)) {
       chats[roomId] = [];
     }
-
     chats[roomId]!.add({'senderId': senderId, 'text': message});
     _getStreamController(roomId).add(chats[roomId]!);
-
     _saveChatHistoryToPrefs(roomId);
   }
 }
