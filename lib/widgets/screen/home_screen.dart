@@ -174,6 +174,7 @@ class _HomeScreenState extends State<HomeScreen>
         ],
       ),
       body: RefreshIndicator(
+        color: AppColor.primaryColor,
         onRefresh: () => _fetchRoomList(isReload: true),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
@@ -187,7 +188,9 @@ class _HomeScreenState extends State<HomeScreen>
                     ? const Center(
                         child: Padding(
                           padding: EdgeInsets.all(8.0),
-                          child: CircularProgressIndicator(),
+                          child: CircularProgressIndicator(
+                            color: AppColor.primaryColor,
+                          ),
                         ),
                       )
                     : const SizedBox.shrink();
