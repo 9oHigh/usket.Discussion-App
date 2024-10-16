@@ -101,7 +101,7 @@ class ApiService {
     }
   }
 
-  Future<bool> createRoom(int topicId, String roomName, int playerId,
+  Future<Room?> createRoom(int topicId, String roomName, int playerId,
       DateTime startTime, DateTime endTime) async {
     final response = await http.post(
       Uri.parse("$_baseUrl${EndPoint.roomCreate.url}"),
@@ -120,9 +120,10 @@ class ApiService {
     );
 
     if (200 <= response.statusCode && response.statusCode < 299) {
-      return true;
+      dynamic json = jsonDecode(response.body);
+      return Room.fromCreated(json);
     } else {
-      return false;
+      return null;
     }
   }
 

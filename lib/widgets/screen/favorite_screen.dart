@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:app_team1/manager/notification_manager.dart';
 import 'package:app_team1/manager/socket_manager.dart';
 import 'package:app_team1/manager/toast_manager.dart';
 import 'package:app_team1/services/api_service.dart';
@@ -33,8 +34,6 @@ class _FavoriteScreenState extends State<FavoriteScreen>
 
   final ApiService _apiService = ApiService();
   final ScrollController _scrollController = ScrollController();
-  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
 
   @override
   void initState() {
@@ -146,11 +145,6 @@ class _FavoriteScreenState extends State<FavoriteScreen>
     final startTime = _reservedRooms[index].startTime;
     final endTime = _reservedRooms[index].endTime;
     return now.isAfter(startTime) && now.isBefore(endTime);
-  }
-
-  Future<void> _cancelNotification(int index) async {
-    int notificationId = _reservedRooms[index].roomId;
-    await _flutterLocalNotificationsPlugin.cancel(notificationId);
   }
 
   @override
@@ -288,12 +282,14 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                                   width: 4,
                                 ),
                                 OutlinedButton(
-                                  onPressed: () {
+                                  onPressed: () async {
                                     _updateReservation(index);
-                                    _cancelNotification(index);
                                     SocketManager().exitRoom(
                                       _reservedRooms[index].roomId.toString(),
                                     );
+                                    await NotificationManager()
+                                        .cancelNotification(
+                                            _reservedRooms[index]);
                                   },
                                   style: OutlinedButton.styleFrom(
                                     side: const BorderSide(

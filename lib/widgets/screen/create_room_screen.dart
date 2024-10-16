@@ -1,3 +1,4 @@
+import 'package:app_team1/manager/notification_manager.dart';
 import 'package:app_team1/manager/toast_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/api_service.dart';
@@ -88,7 +89,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
     }
 
     try {
-      await _apiService.createRoom(
+      final room = await _apiService.createRoom(
         _selectedTopicId!,
         _roomNameController.text,
         playerId,
@@ -96,11 +97,14 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
         endDateTime.toUtc(),
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('방이 성공적으로 생성되었습니다!'),
-        ),
-      );
+      if (room != null) {
+        await NotificationManager().scheduleNotification(room);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('방이 성공적으로 생성되었습니다!\n방이 시작되기 1분전에 알림을 보낼게요 :)'),
+          ),
+        );
+      }
     } catch (error) {
       _showError(CreateError.failCreate, additionalMessage: error.toString());
     }

@@ -35,6 +35,19 @@ class Room {
     );
   }
 
+  static Room fromCreated(Map<String, dynamic> map) {
+    final room = map['room'];
+    return Room(
+      roomId: room['id'],
+      playerId: room['playerId'],
+      topicId: room['topicId'],
+      roomName: room['name'],
+      startTime: DateTime.parse(room['startTime']),
+      endTime: DateTime.parse(room['endTime']),
+      isReserved: true,
+    );
+  }
+
   static Room toReservedRoom(Room room) {
     room.saveIsReserved(true);
     return Room(
