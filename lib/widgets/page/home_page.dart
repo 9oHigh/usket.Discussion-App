@@ -1,7 +1,6 @@
-import 'package:app_team1/manager/toast_manager.dart';
 import 'package:app_team1/widgets/screen/favorite_screen.dart';
 import 'package:app_team1/widgets/screen/home_screen.dart';
-import 'package:app_team1/widgets/utils/constants.dart';
+import 'package:app_team1/widgets/utils/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../gen/assets.gen.dart';
@@ -35,23 +34,23 @@ class _HomePageState extends State<HomePage> {
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: _selectedIndex == 0
-              ? Assets.images.homeIconFilled.image(width: 24, height: 24)
-              : Assets.images.homeIconOutlined.image(width: 24, height: 24),
+                ? Assets.images.homeIconFilled.image(width: 24, height: 24)
+                : Assets.images.homeIconOutlined.image(width: 24, height: 24),
             label: 'HOME',
           ),
           BottomNavigationBarItem(
             icon: _selectedIndex == 1
-              ? Assets.images.myIconFilled.image(width: 24, height: 24)
-              : Assets.images.myIconOutlined.image(width: 24, height: 24),
+                ? Assets.images.myIconFilled.image(width: 24, height: 24)
+                : Assets.images.myIconOutlined.image(width: 24, height: 24),
             label: 'MY ROOM',
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: AppColors.thirdaryColor,
+        selectedItemColor: AppColor.thirdaryColor,
         onTap: _onItemTapped,
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primaryColor,
+        backgroundColor: AppColor.primaryColor,
         onPressed: () async {
           final isCreated = await context.push('/create_room');
           if (isCreated == true && _selectedIndex == 0) {
@@ -60,13 +59,14 @@ class _HomePageState extends State<HomePage> {
             setState(() {
               _onItemTapped(0);
             });
-            await Future.delayed(const Duration(milliseconds: 500));
+            await Future.delayed(const Duration(milliseconds: 750));
             _onItemTapped(1);
-          } else {
-            ToastManager().showToast(context, "방을 만들지 못했습니다.\n다시 시도해주세요.");
           }
         },
-        child: const Icon(Icons.add, color: AppColors.buttonTextColor,),
+        child: const Icon(
+          Icons.add,
+          color: AppColor.buttonTextColor,
+        ),
       ),
     );
   }

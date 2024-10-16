@@ -1,8 +1,7 @@
 import 'package:app_team1/model/room.dart';
 import 'package:app_team1/model/topic/topic.dart';
 import 'package:app_team1/services/api_service.dart';
-import 'package:app_team1/widgets/utils/constants.dart';
-import 'package:app_team1/widgets/utils/infinite_scroll_mixin.dart';
+import 'package:app_team1/widgets/utils/mixin/infinite_scroll_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -11,9 +10,13 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import '../../manager/toast_manager.dart';
-import '../app_bar.dart';
-import '../styles/ui_styles.dart';
+import '../custom/style/shadow_style.dart';
+import '../custom/widget/app_bar.dart';
 import '../../gen/fonts.gen.dart';
+import '../utils/app_color.dart';
+import '../utils/app_constant.dart';
+import '../utils/app_font_size.dart';
+import '../utils/topic_mapped.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -37,10 +40,10 @@ class _HomeScreenState extends State<HomeScreen>
   void initState() {
     super.initState();
     initializeScrollController(_scrollController, _fetchRoomList);
-    _permissionWithNotification();
+    _initializPermission();
     _initializeNotifications();
     _initializeRoomList();
-    _startTimer();
+    _startRoomExpirationTimer();
   }
 
   @override
@@ -50,23 +53,23 @@ class _HomeScreenState extends State<HomeScreen>
     super.dispose();
   }
 
-  _permissionWithNotification() async {
-    if (await Permission.notification.isDenied &&
-        !await Permission.notification.isPermanentlyDenied) {
-      await [Permission.notification].request();
+  _initializPermission() async {
+    final permissionStatus = await Permission.notification.status;
+    if (permissionStatus.isDenied && !permissionStatus.isPermanentlyDenied) {
+      await Permission.notification.request();
     }
   }
 
   _initializeNotifications() async {
-    AndroidInitializationSettings android =
-        const AndroidInitializationSettings("@mipmap/ic_launcher");
-    DarwinInitializationSettings ios = const DarwinInitializationSettings(
+    const androidSettings =
+        AndroidInitializationSettings("@mipmap/ic_launcher");
+    const iosSettings = DarwinInitializationSettings(
       requestSoundPermission: false,
       requestBadgePermission: false,
       requestAlertPermission: false,
     );
-    InitializationSettings settings =
-        InitializationSettings(android: android, iOS: ios);
+    const settings =
+        InitializationSettings(android: androidSettings, iOS: iosSettings);
     await _flutterLocalNotificationsPlugin.initialize(settings);
   }
 
@@ -75,13 +78,12 @@ class _HomeScreenState extends State<HomeScreen>
     await _fetchRoomList(isReload: true);
   }
 
-  _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
-      _checkExpiredRooms();
-    });
+  _startRoomExpirationTimer() {
+    _timer = Timer.periodic(
+        const Duration(seconds: 10), (_) => _removeExpiredRooms());
   }
 
-  _checkExpiredRooms() async {
+  _removeExpiredRooms() async {
     final now = DateTime.now();
     setState(() {
       _roomList.removeWhere((room) {
@@ -96,55 +98,45 @@ class _HomeScreenState extends State<HomeScreen>
     if (mounted) setState(() {});
   }
 
-  Future<void> _fetchRoomList({bool? isReload}) async {
+  Future<void> _fetchRoomList({bool isReload = false}) async {
     final DateTime now = DateTime.now();
+    List<Room> fetchedRooms =
+        await _apiService.getRoomList(isReload ? null : cursorId, 10);
 
-    if (isReload != null && isReload) {
-      _roomList = await _apiService.getRoomList(null, 10);
-      _roomList = _roomList
-          .where((room) => !room.isReserved && now.isBefore(room.startTime))
-          .toList();
-      if (_roomList.isNotEmpty) {
-        cursorId = _roomList.last.roomId.toString();
-      }
-      if (mounted) setState(() {});
-    } else {
-      final toBeAddedRooms = await _apiService.getRoomList(cursorId, 10);
-      if (toBeAddedRooms.isEmpty) {
-        return;
-      } else {
-        _roomList += toBeAddedRooms;
-        _roomList = _roomList
-            .where((room) => !room.isReserved && now.isBefore(room.startTime))
-            .toList();
-        if (_roomList.isNotEmpty) {
-          cursorId = _roomList.last.roomId.toString();
-        }
-      }
-    }
+    if (fetchedRooms.isEmpty) return;
+
+    final List<Room> filteredRoom = fetchedRooms
+        .where((room) => !room.isReserved && now.isBefore(room.startTime))
+        .toList();
+
+    _roomList = isReload ? filteredRoom : _roomList += filteredRoom;
+    cursorId = _roomList.isNotEmpty ? _roomList.last.roomId.toString() : null;
+    if (mounted && isReload) setState(() {});
   }
 
   Future<void> _makeReservation(int index) async {
-    ToastManager().showToast(context,
-        "[${_roomList[index].roomName}] 토론방이 예약되었습니다.\n1분 전에 안내해드릴게요 :)");
+    final room = _roomList[index];
+    ToastManager().showToast(
+        context, "[${room.roomName}] 토론방이 예약되었습니다.\n1분 전에 안내해드릴게요 :)");
     setState(() {
-      _roomList[index].saveIsReserved(true);
+      room.saveIsReserved(true);
       _roomList.removeAt(index);
     });
+
+    await _scheduleNotification(room);
   }
 
-  Future<void> _scheduleNotification(int index) async {
+  Future<void> _scheduleNotification(Room room) async {
     final DateTime now = DateTime.now();
-    DateTime startTime = _roomList[index].startTime;
-    DateTime notificationTime = startTime.subtract(const Duration(minutes: 1));
+    final notificationTime =
+        room.startTime.subtract(const Duration(minutes: 1));
+    final scheduledDateTime = tz.TZDateTime.from(notificationTime, tz.local);
 
-    tz.TZDateTime scheduledDateTime =
-        tz.TZDateTime.from(notificationTime, tz.local);
-    if (scheduledDateTime.isBefore(now)) {
+    if (scheduledDateTime.isAfter(now)) {
       await _flutterLocalNotificationsPlugin.zonedSchedule(
-        _roomList[index].roomId,
+        room.roomId,
         '방 예약 알림',
-        '예약한 방이 1분 뒤에 시작합니다.',
+        '[${room.roomName}]방이 1분 뒤에 시작합니다!\n서둘러주세요 :)',
         scheduledDateTime,
         const NotificationDetails(
           android: AndroidNotificationDetails(
@@ -165,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: AppColor.backgroundColor,
       appBar: CustomAppBar(
         title: 'ROOM LIST',
         actions: [
@@ -177,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen>
               }
             },
             icon: const Icon(Icons.filter_alt,
-                color: AppColors.appBarContentsColor),
+                color: AppColor.appBarContentsColor),
           ),
         ],
       ),
@@ -222,8 +214,8 @@ class _HomeScreenState extends State<HomeScreen>
                         Row(
                           children: [
                             topicImageMap[topicName]?.image(
-                                  width: AppConstants.listImageSize(context),
-                                  height: AppConstants.listImageSize(context),
+                                  width: AppConstant.listImageSize(context),
+                                  height: AppConstant.listImageSize(context),
                                   fit: BoxFit.cover,
                                 ) ??
                                 Container(),
@@ -235,15 +227,16 @@ class _HomeScreenState extends State<HomeScreen>
                               children: [
                                 Text(topicNameMap[topicName] ?? topicName,
                                     style: const TextStyle(
-                                        fontSize: AppFontSizes.topicTextSize,
+                                        fontSize: AppFontSize.topicTextSize,
                                         fontWeight: FontWeight.w600)),
                                 const SizedBox(
                                   height: 4,
                                 ),
                                 Text(_roomList[index].roomName,
                                     style: const TextStyle(
-                                      fontSize: AppFontSizes.titleTextSize, fontFamily: FontFamily.spoqaHanSansNeo
-                                    )),
+                                        fontSize: AppFontSize.titleTextSize,
+                                        fontFamily:
+                                            FontFamily.spoqaHanSansNeo)),
                               ],
                             ),
                           ],
@@ -255,18 +248,17 @@ class _HomeScreenState extends State<HomeScreen>
                             children: [
                               OutlinedButton(
                                 onPressed: () async {
-                                  await _scheduleNotification(index);
                                   await _makeReservation(index);
                                 },
                                 style: OutlinedButton.styleFrom(
                                   side: const BorderSide(
-                                    color: AppColors.primaryColor,
+                                    color: AppColor.primaryColor,
                                     width: 1,
                                   ),
                                 ),
                                 child: const Text('예약',
-                                    style:
-                                        TextStyle(color: AppColors.primaryColor)),
+                                    style: TextStyle(
+                                        color: AppColor.primaryColor)),
                               ),
                             ],
                           ),
@@ -275,15 +267,15 @@ class _HomeScreenState extends State<HomeScreen>
                           children: [
                             const Text("시작",
                                 style: TextStyle(
-                                    fontSize: AppFontSizes.timeTextSize,
+                                    fontSize: AppFontSize.timeTextSize,
                                     fontWeight: FontWeight.w500)),
                             const SizedBox(
                               width: 4,
                             ),
                             Text(startTime,
                                 style: const TextStyle(
-                                    fontSize: AppFontSizes.timeTextSize,
-                                    color: AppColors.thirdaryColor,
+                                    fontSize: AppFontSize.timeTextSize,
+                                    color: AppColor.thirdaryColor,
                                     fontWeight: FontWeight.w500)),
                             const SizedBox(
                               width: 8,
@@ -291,29 +283,28 @@ class _HomeScreenState extends State<HomeScreen>
                             Container(
                               width: 1,
                               height: 10,
-                              color: AppColors.thirdaryColor,
+                              color: AppColor.thirdaryColor,
                             ),
                             const SizedBox(
                               width: 8,
                             ),
                             const Text("종료",
                                 style: TextStyle(
-                                    fontSize: AppFontSizes.timeTextSize,
+                                    fontSize: AppFontSize.timeTextSize,
                                     fontWeight: FontWeight.w500)),
                             const SizedBox(
                               width: 4,
                             ),
                             Text(endTime,
                                 style: const TextStyle(
-                                    fontSize: AppFontSizes.timeTextSize,
-                                    color: AppColors.thirdaryColor,
+                                    fontSize: AppFontSize.timeTextSize,
+                                    color: AppColor.thirdaryColor,
                                     fontWeight: FontWeight.w500)),
                           ],
                         ),
                         const SizedBox(
                           height: 4,
                         ),
-                        
                       ],
                     ),
                   ),

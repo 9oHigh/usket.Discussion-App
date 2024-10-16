@@ -15,7 +15,6 @@ mixin InfiniteScrollMixin<T extends StatefulWidget> on State<T> {
           });
         }
         await fetchData();
-        // 딜레이를 통해서 확인 하기
         await Future.delayed(const Duration(seconds: 1));
         if (mounted) {
           setState(() {
