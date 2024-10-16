@@ -216,7 +216,8 @@ class _FavoriteScreenState extends State<FavoriteScreen>
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                   decoration: createShadowStyle(),
                   child: Padding(
                     padding: const EdgeInsets.all(10.0),
@@ -234,18 +235,29 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                             const SizedBox(
                               width: 8,
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(topicNameMap[topicName] ?? topicName,
-                                    style: const TextStyle(
-                                        fontSize: AppFontSizes.topicTextSize,
-                                        fontWeight: FontWeight.w600)),
-                                const SizedBox(
-                                  height: 4,
-                                ),
-                                Text(_reservedRoomList[index].roomName, style: const TextStyle(fontSize: AppFontSizes.titleTextSize, fontFamily: FontFamily.spoqaHanSansNeo)),
-                              ],
+                            Flexible(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(topicNameMap[topicName] ?? topicName,
+                                      style: const TextStyle(
+                                          fontSize: AppFontSizes.topicTextSize,
+                                          fontWeight: FontWeight.w600)),
+                                  const SizedBox(
+                                    height: 4,
+                                  ),
+                                  Container(
+                                      padding: const EdgeInsets.all(2.0),
+                                      child: Text(
+                                          overflow: TextOverflow.ellipsis,
+                                          _reservedRoomList[index].roomName,
+                                          style: const TextStyle(
+                                              fontSize:
+                                                  AppFontSizes.titleTextSize,
+                                              fontFamily:
+                                                  FontFamily.spoqaHanSansNeo))),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -298,7 +310,9 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                                       width: 1, // 테두리 두께
                                     ),
                                   ),
-                                  child: const Text('취소', style: TextStyle(color: AppColors.primaryColor)),
+                                  child: const Text('취소',
+                                      style: TextStyle(
+                                          color: AppColors.primaryColor)),
                                 ),
                               ],
                             ),

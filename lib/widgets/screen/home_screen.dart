@@ -140,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen>
 
     tz.TZDateTime scheduledDateTime =
         tz.TZDateTime.from(notificationTime, tz.local);
-    if (scheduledDateTime.isBefore(now)) {
+    if (scheduledDateTime.isAfter(now)) {
       await _flutterLocalNotificationsPlugin.zonedSchedule(
         _roomList[index].roomId,
         '방 예약 알림',
@@ -230,21 +230,24 @@ class _HomeScreenState extends State<HomeScreen>
                             const SizedBox(
                               width: 8,
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(topicNameMap[topicName] ?? topicName,
-                                    style: const TextStyle(
-                                        fontSize: AppFontSizes.topicTextSize,
-                                        fontWeight: FontWeight.w600)),
-                                const SizedBox(
-                                  height: 4,
-                                ),
-                                Text(_roomList[index].roomName,
-                                    style: const TextStyle(
-                                      fontSize: AppFontSizes.titleTextSize, fontFamily: FontFamily.spoqaHanSansNeo
-                                    )),
-                              ],
+                            Flexible(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(topicNameMap[topicName] ?? topicName,
+                                      style: const TextStyle(
+                                          fontSize: AppFontSizes.topicTextSize,
+                                          fontWeight: FontWeight.w600)),
+                                  const SizedBox(
+                                    height: 4,
+                                  ),
+                                  Text(_roomList[index].roomName,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: AppFontSizes.titleTextSize, fontFamily: FontFamily.spoqaHanSansNeo
+                                      )),
+                                ],
+                              ),
                             ),
                           ],
                         ),
