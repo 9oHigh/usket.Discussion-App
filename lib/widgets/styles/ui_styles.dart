@@ -1,29 +1,29 @@
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
 
-class TextButtonStyle {
-  static final ButtonStyle textButtonStyle = TextButton.styleFrom(
-    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8),
-      side: const BorderSide(color: Colors.grey, width: 1),
-    ),
+class SectionTitleStyle {
+  static const TextStyle sectionTitleStyle = TextStyle(
+    fontSize: 17,
+    color: AppColors.thirdaryColor,
+    fontWeight: FontWeight.w500,
   );
 }
 
-BoxDecoration createShadowStyle({Color color = AppColors.roomTileColor,  double borderRadius = 20}) {
+BoxDecoration createShadowStyle(
+    {Color color = AppColors.roomTileColor,
+    double borderRadius = 20,
+    double spreadRadius = 1,
+    Offset offset = const Offset(0, 3)}) {
   return BoxDecoration(
     color: color,
     borderRadius: BorderRadius.circular(borderRadius),
     boxShadow: [
       BoxShadow(
         color: Colors.black.withOpacity(0.1),
-        spreadRadius: 1,
+        spreadRadius: spreadRadius,
         blurRadius: 5,
-        offset: const Offset(0, 3),
+        offset: offset,
       ),
     ],
   );
 }
-
-

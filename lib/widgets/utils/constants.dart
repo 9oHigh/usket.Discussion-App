@@ -35,8 +35,8 @@ Map<String, AssetGenImage> topicImageMap = {
   'my-icon-outlined': Assets.images.myIconOutlined,
 };
 
-
 class AppConstants {
+  // 화면 높이, 너비
   static double getScreenHeight(BuildContext context) {
     return MediaQuery.of(context).size.height;
   }
@@ -45,36 +45,36 @@ class AppConstants {
     return MediaQuery.of(context).size.width;
   }
 
-  static double spaceBetweenColumns(BuildContext context) {
+  // 간격
+  static double spaceMedium(BuildContext context) {
     return getScreenHeight(context) * 0.05;
   }
 
-  static double spaceBetweenElements(BuildContext context) {
+  static double spaceSmall(BuildContext context) {
     return getScreenHeight(context) * 0.015;
   }
 
+  // room list screen
+  static double mainInfoWidth(BuildContext context) {
+    return getScreenWidth(context) * 0.8;
+  }
+
+  // create room screen
   static double textFieldWidth(BuildContext context) {
     return getScreenWidth(context) * 0.9;
   }
 
-  static double buttonWidth(BuildContext context) {
-    return getScreenWidth(context) * 0.9;
+  static double listImageSize(BuildContext context) {
+    return getScreenHeight(context) * 0.07;
   }
 
-  static double buttonHeight(BuildContext context) {
-    return getScreenHeight(context) * 0.04;
-  }
-
+  // filter screen
   static double topicBoxSize(BuildContext context) {
-    return getScreenHeight(context) * 0.09;
+    return getScreenHeight(context) * 0.092;
   }
 
   static double badgeSize(BuildContext context) {
     return getScreenHeight(context) * 0.025;
-  }
-
-  static double listImageSize(BuildContext context) {
-    return getScreenHeight(context) * 0.063;
   }
 
   static double filterImageSize(BuildContext context) {
@@ -89,8 +89,24 @@ class AppConstants {
 class AppColors {
   // 앱 테마
   static const Color primaryColor = Color(0xff6684F3);
-  static const Color secondaryColor = Color(0xffB2C7FC);
+  static const Color secondaryColor = Color(0xffDDE7FF);
   static const Color thirdaryColor = Color(0xff3651B2);
+
+
+  static const Color startColor = Color(0xff6684F3);
+  static const Color endColor =Color(0xffB2C7FC);
+
+  static const List<Color> gradientColors = [
+    startColor,
+    endColor,
+  ];
+
+  static const LinearGradient linearGradient = LinearGradient(
+    colors: gradientColors,
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
   static const Color backgroundColor = Color(0xffEFF3FF);
   static const Color roomTileColor = Color(0xffffffff);
 
@@ -99,7 +115,7 @@ class AppColors {
   static const Color buttonTextColor = Color(0xffffffff);
 }
 
-class AppFontSizes{
+class AppFontSizes {
   static const double topicTextSize = 16;
   static const double titleTextSize = 19;
   static const double timeTextSize = 16;

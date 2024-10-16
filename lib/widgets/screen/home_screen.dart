@@ -270,9 +270,6 @@ class _HomeScreenState extends State<HomeScreen>
                             ],
                           ),
                         ),
-                        const SizedBox(
-                          height: 4,
-                        ),
                         Row(
                           children: [
                             const Text("시작",
@@ -312,6 +309,10 @@ class _HomeScreenState extends State<HomeScreen>
                                     fontWeight: FontWeight.w500)),
                           ],
                         ),
+                        const SizedBox(
+                          height: 4,
+                        ),
+                        
                       ],
                     ),
                   ),
