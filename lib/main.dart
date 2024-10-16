@@ -1,3 +1,4 @@
+import 'package:app_team1/manager/notification_manager.dart';
 import 'package:app_team1/manager/socket_manager.dart';
 import 'package:app_team1/manager/topic_manager.dart';
 import 'package:app_team1/model/player.dart';
@@ -14,6 +15,7 @@ void main() async {
   await _initializeUser();
   await _initializeTopicManager();
   await _initializeSocketManager();
+  await _initializeNotificationManager();
   runApp(const AppTeam1());
 }
 
@@ -33,6 +35,10 @@ _initializeTopicManager() async {
 
 _initializeSocketManager() async {
   await SocketManager().initSocket();
+}
+
+_initializeNotificationManager() async {
+  await NotificationManager().initializeNotifications();
 }
 
 class AppTeam1 extends StatelessWidget {

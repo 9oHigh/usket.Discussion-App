@@ -1,3 +1,4 @@
+import 'package:app_team1/manager/notification_manager.dart';
 import 'package:app_team1/model/room.dart';
 import 'package:app_team1/model/topic/topic.dart';
 import 'package:app_team1/services/api_service.dart';
@@ -7,7 +8,6 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import '../../manager/toast_manager.dart';
 import '../custom/style/shadow_style.dart';
@@ -33,15 +33,12 @@ class _HomeScreenState extends State<HomeScreen>
 
   final ApiService _apiService = ApiService();
   final ScrollController _scrollController = ScrollController();
-  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
 
   @override
   void initState() {
     super.initState();
     initializeScrollController(_scrollController, _fetchRoomList);
     _initializPermission();
-    _initializeNotifications();
     _initializeRoomList();
     _startRoomExpirationTimer();
   }
@@ -58,19 +55,6 @@ class _HomeScreenState extends State<HomeScreen>
     if (permissionStatus.isDenied && !permissionStatus.isPermanentlyDenied) {
       await Permission.notification.request();
     }
-  }
-
-  _initializeNotifications() async {
-    const androidSettings =
-        AndroidInitializationSettings("@mipmap/ic_launcher");
-    const iosSettings = DarwinInitializationSettings(
-      requestSoundPermission: false,
-      requestBadgePermission: false,
-      requestAlertPermission: false,
-    );
-    const settings =
-        InitializationSettings(android: androidSettings, iOS: iosSettings);
-    await _flutterLocalNotificationsPlugin.initialize(settings);
   }
 
   _initializeRoomList() async {
@@ -133,24 +117,7 @@ class _HomeScreenState extends State<HomeScreen>
     final scheduledDateTime = tz.TZDateTime.from(notificationTime, tz.local);
 
     if (scheduledDateTime.isAfter(now)) {
-      await _flutterLocalNotificationsPlugin.zonedSchedule(
-        room.roomId,
-        '방 예약 알림',
-        '[${room.roomName}]방이 1분 뒤에 시작합니다!\n서둘러주세요 :)',
-        scheduledDateTime,
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            '방 예약 알림 채널',
-            '방 예약 알림',
-            channelDescription: '방 예약 알림을 위한 채널',
-            importance: Importance.max,
-            priority: Priority.high,
-          ),
-        ),
-        androidScheduleMode: AndroidScheduleMode.exact,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-      );
+      NotificationManager().scheduleNotification(room);
     }
   }
 
@@ -239,8 +206,9 @@ class _HomeScreenState extends State<HomeScreen>
                                   Text(_roomList[index].roomName,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
-                                        fontSize: AppFontSize.titleTextSize, fontFamily: FontFamily.spoqaHanSansNeo
-                                      )),
+                                          fontSize: AppFontSize.titleTextSize,
+                                          fontFamily:
+                                              FontFamily.spoqaHanSansNeo)),
                                 ],
                               ),
                             ),

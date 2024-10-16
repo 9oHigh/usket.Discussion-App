@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:app_team1/manager/notification_manager.dart';
 import 'package:app_team1/manager/socket_manager.dart';
 import 'package:app_team1/manager/toast_manager.dart';
 import 'package:app_team1/services/api_service.dart';
@@ -148,11 +149,6 @@ class _FavoriteScreenState extends State<FavoriteScreen>
     return now.isAfter(startTime) && now.isBefore(endTime);
   }
 
-  Future<void> _cancelNotification(int index) async {
-    int notificationId = _reservedRooms[index].roomId;
-    await _flutterLocalNotificationsPlugin.cancel(notificationId);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -288,12 +284,14 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                                   width: 4,
                                 ),
                                 OutlinedButton(
-                                  onPressed: () {
+                                  onPressed: () async {
                                     _updateReservation(index);
-                                    _cancelNotification(index);
                                     SocketManager().exitRoom(
                                       _reservedRooms[index].roomId.toString(),
                                     );
+                                    await NotificationManager()
+                                        .cancelNotification(
+                                            _reservedRooms[index]);
                                   },
                                   style: OutlinedButton.styleFrom(
                                     side: const BorderSide(
