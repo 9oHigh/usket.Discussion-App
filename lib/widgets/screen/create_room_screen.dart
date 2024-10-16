@@ -1,6 +1,5 @@
 import 'package:app_team1/manager/toast_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 
 import '../../services/api_service.dart';
 import 'package:flutter/material.dart';
@@ -257,6 +256,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                                         : Colors.black;
                                     return GestureDetector(
                                       onTap: () {
+                                        FocusManager.instance.primaryFocus?.unfocus();
                                         setState(() {
                                           if (_selectedIndex != null &&
                                               _selectedIndex == index) {

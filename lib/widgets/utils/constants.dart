@@ -70,7 +70,7 @@ class AppConstants {
 
   // filter screen
   static double topicBoxSize(BuildContext context) {
-    return getScreenHeight(context) * 0.09;
+    return getScreenHeight(context) * 0.092;
   }
 
   static double badgeSize(BuildContext context) {
@@ -89,7 +89,7 @@ class AppConstants {
 class AppColors {
   // 앱 테마
   static const Color primaryColor = Color(0xff6684F3);
-  static const Color secondaryColor = Color(0xffB2C7FC);
+  static const Color secondaryColor = Color(0xffDDE7FF);
   static const Color thirdaryColor = Color(0xff3651B2);
 
 

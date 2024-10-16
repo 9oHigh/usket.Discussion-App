@@ -13,6 +13,7 @@ import 'package:intl/intl.dart';
 import '../app_bar.dart';
 import '../utils/constants.dart';
 import '../styles/ui_styles.dart';
+import '../../gen/fonts.gen.dart';
 
 class FavoriteScreen extends StatefulWidget {
   const FavoriteScreen({super.key});
@@ -243,7 +244,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                                 const SizedBox(
                                   height: 4,
                                 ),
-                                Text(_reservedRoomList[index].roomName, style: const TextStyle(fontSize: AppFontSizes.titleTextSize,)),
+                                Text(_reservedRoomList[index].roomName, style: const TextStyle(fontSize: AppFontSizes.titleTextSize, fontFamily: FontFamily.spoqaHanSansNeo)),
                               ],
                             ),
                           ],
