@@ -106,9 +106,10 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
     }
   }
 
-   _showError(CreateError createError, {String? additionalMessage}) {
-    String errorMessage =
-        additionalMessage != null ? "${createError.message} $additionalMessage" : createError.message;
+  _showError(CreateError createError, {String? additionalMessage}) {
+    String errorMessage = additionalMessage != null
+        ? "${createError.message} $additionalMessage"
+        : createError.message;
     ToastManager().showToast(context, errorMessage);
   }
 
@@ -237,87 +238,91 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                                   style: TextStyle(color: Colors.black),
                                 ),
                               )
-                            : Center(
-                                child: Wrap(
-                                  alignment: WrapAlignment.center,
-                                  spacing: 12.0,
-                                  runSpacing: 12.0,
-                                  children:
-                                      List.generate(_topicList.length, (index) {
-                                    bool isSelected = _selectedIndex == index;
-                                    Color boxColor = isSelected
-                                        ? AppColor.thirdaryColor
-                                        : Colors.white;
-                                    Color topicNameColor = isSelected
-                                        ? Colors.white
-                                        : Colors.black;
-                                    return GestureDetector(
-                                      onTap: () {
-                                        FocusManager.instance.primaryFocus
-                                            ?.unfocus();
-                                        setState(() {
-                                          if (_selectedIndex != null &&
-                                              _selectedIndex == index) {
-                                            _selectedIndex = null;
-                                          } else {
-                                            _selectedIndex = index;
-                                          }
-                                          _selectedTopicId =
-                                              _topicList[index].id;
-                                        });
-                                      },
-                                      child: Container(
-                                        width:
-                                            AppConstant.topicBoxSize(context),
-                                        height:
-                                            AppConstant.topicBoxSize(context),
-                                        decoration:
-                                            createShadowStyle(color: boxColor),
-                                        child: Center(
-                                          child: Column(
-                                            children: [
-                                              (_selectedIndex ==
-                                                          index
-                                                      ? topicImageMap[
-                                                              '${_topicList[index].name}-selected']
-                                                          ?.image(
-                                                              width: AppConstant
-                                                                  .filterImageSize(
-                                                                      context),
-                                                              height: AppConstant
-                                                                  .filterImageSize(
-                                                                      context),
-                                                              fit: BoxFit.cover)
-                                                      : topicImageMap[_topicList[
-                                                                  index]
-                                                              .name]
-                                                          ?.image(
-                                                              width: AppConstant
-                                                                  .filterImageSize(
-                                                                      context),
-                                                              height: AppConstant
-                                                                  .filterImageSize(
-                                                                      context),
-                                                              fit: BoxFit
-                                                                  .cover)) ??
-                                                  Container(),
-                                              Text(
-                                                topicNameMap[_topicList[index]
-                                                        .name] ??
-                                                    '기타',
-                                                style: TextStyle(
-                                                  color: topicNameColor,
-                                                  fontSize: AppFontSize
-                                                      .filterTextSize,
-                                                  fontWeight: FontWeight.w500,
+                            : SizedBox(
+                                height: 160,
+                                child: SingleChildScrollView(
+                                  child: GridView.builder(
+                                    shrinkWrap: true,
+                                    gridDelegate:
+                                        const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 4,
+                                      childAspectRatio: 1,
+                                      crossAxisSpacing: 8,
+                                      mainAxisSpacing: 8,
+                                    ),
+                                    itemCount: _topicList.length,
+                                    itemBuilder: (context, index) {
+                                      bool isSelected = _selectedIndex == index;
+                                      Color boxColor = isSelected
+                                          ? AppColor.thirdaryColor
+                                          : Colors.white;
+                                      Color topicNameColor = isSelected
+                                          ? Colors.white
+                                          : Colors.black;
+
+                                      return Stack(
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                _selectedIndex = index;
+                                                if (_selectedIndex != null) {
+                                                  _selectedTopicId = _topicList[
+                                                          _selectedIndex!]
+                                                      .id;
+                                                }
+                                              });
+                                            },
+                                            child: Container(
+                                              decoration: createShadowStyle(
+                                                  color: boxColor),
+                                              child: Center(
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    (isSelected
+                                                            ? topicImageMap['${_topicList[index].name}-selected']?.image(
+                                                                width: AppConstant
+                                                                    .filterImageSize(
+                                                                        context),
+                                                                height: AppConstant
+                                                                    .filterImageSize(
+                                                                        context),
+                                                                fit: BoxFit
+                                                                    .cover)
+                                                            : topicImageMap[_topicList[index].name]?.image(
+                                                                width: AppConstant
+                                                                    .filterImageSize(
+                                                                        context),
+                                                                height: AppConstant
+                                                                    .filterImageSize(
+                                                                        context),
+                                                                fit: BoxFit
+                                                                    .cover)) ??
+                                                        Container(),
+                                                    Text(
+                                                      topicNameMap[
+                                                              _topicList[index]
+                                                                  .name] ??
+                                                          '기타',
+                                                      style: TextStyle(
+                                                        color: topicNameColor,
+                                                        fontSize: AppFontSize
+                                                            .filterTextSize,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
-                                            ],
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                                    );
-                                  }),
+                                        ],
+                                      );
+                                    },
+                                  ),
                                 ),
                               ),
                       ),
