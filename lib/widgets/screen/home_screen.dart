@@ -102,12 +102,13 @@ class _HomeScreenState extends State<HomeScreen>
     final room = _roomList[index];
     ToastManager().showToast(
         context, "[${room.roomName}] 토론방이 예약되었습니다.\n1분 전에 안내해드릴게요 :)");
+
+    await room.saveIsReserved(true);
+    await _scheduleNotification(room);
+
     setState(() {
-      room.saveIsReserved(true);
       _roomList.removeAt(index);
     });
-
-    await _scheduleNotification(room);
   }
 
   Future<void> _scheduleNotification(Room room) async {

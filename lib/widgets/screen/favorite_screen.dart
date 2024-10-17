@@ -76,7 +76,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final int playerId = prefs.getInt("playerId") ?? 0;
     List<Room> fetchedRooms =
-        await _apiService.getRoomList(isReload ? null : cursorId, 10);
+        await _apiService.getRoomList(isReload ? null : cursorId, 100);
 
     if (fetchedRooms.isEmpty) return;
 
@@ -84,6 +84,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
         .where((room) => room.isReserved || room.playerId == playerId)
         .map((room) => Room.toReservedRoom(room))
         .toList();
+
     _reservedRooms = isReload ? filteredRooms : _reservedRooms += filteredRooms;
     cursorId = _reservedRooms.isNotEmpty
         ? _reservedRooms.last.roomId.toString()
@@ -132,8 +133,8 @@ class _FavoriteScreenState extends State<FavoriteScreen>
     } else {
       ToastManager().showToast(
           context, "[${_reservedRooms[index].roomName}] 토론방을 취소했습니다.");
+      await _reservedRooms[index].saveIsReserved(false);
       setState(() {
-        _reservedRooms[index].saveIsReserved(false);
         _reservedRooms.removeAt(index);
       });
     }
