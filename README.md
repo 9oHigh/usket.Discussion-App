@@ -61,11 +61,13 @@
 - ### Back
   - node.js
   - typescript
+  - postgresql
   <br>
 - ### 협업도구
-  - Notion
-  - Disrod
-  - Figma
+  - gitlab
+  - notion
+  - disrod
+  - figma
 
 <br>
 
