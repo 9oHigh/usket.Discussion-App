@@ -18,20 +18,20 @@
 
 
 ## 📃 목차 
-- <span style='font-size:130%'>프로젝트 소개</span>
-- <span style='font-size:130%'>프로젝트 프로토 타입</span>
-- <span style='font-size:130%'>사용한 기술 스택</span>
-- <span style='font-size:130%'>프로젝트 아키텍쳐</span>
-- <span style='font-size:130%'>기술적 이슈와 해결 과정</span>
-- <span style='font-size:130%'>프로젝트 팀원</span>
+- #### 프로젝트 소개
+- #### 프로젝트 프로토 타입</span>
+- #### 사용한 기술 스택</span>
+- #### 프로젝트 아키텍쳐</span>
+- #### 기술적 이슈와 해결 과정</span>
+- #### 프로젝트 팀원</span>
 
 <br>
 
 ## 💁 프로젝트 소개
-<span style='font-size:130%'>"주제별로 특정 시간만 활성화되는 채팅방 기능을 가진 SNS 앱"</span>
-- <span style='font-size:130%'>원하는 채팅방을 예약</span>
-- <span style='font-size:130%'>채팅방이 시작되기 전에 기기 알림을 전송</span>
-- <span style='font-size:130%'>정해진 시간이 지나면 채팅방을 종료</span>
+#### "주제별로 특정 시간만 활성화되는 채팅방 기능을 가진 SNS 앱"
+- ##### 원하는 채팅방을 예약
+- ##### <span style='font-size:130%'>채팅방이 시작되기 전에 기기 알림을 전송
+- ##### <span style='font-size:130%'>정해진 시간이 지나면 채팅방을 종료
 
 <br>
 
@@ -71,7 +71,7 @@
       <td><img align=center src="assets/images/profile/profile-1.jpg" width="100" height="100" alt="프로필 이미지"></td>
       <td width="250px">
         <a href="https://github.com/flow2c">
-          <sub<b><span style='font-size:120%'>신가연</span></b></sub>
+          신가연
         </a>
         <br />
         <sub>채팅방 생성 화면과 기능, 필터 화면 및 기능<br>채팅방 알림 예약, 취소<br>UI 디자인 및 구현</sub>
@@ -83,7 +83,7 @@
       <td><img align=center src="assets/images/profile/profile-1.jpg" width="100" height="100" alt="프로필 이미지"></td>
       <td width="250px">
         <a href="https://github.com/flow2c">
-          <sub<b><span style='font-size:120%'>이경후</span></b></sub>
+          이경후
         </a>
         <br />
         <sub>홈 화면과 기능<br>채팅 화면과 기능<br>라우터 적용<br>리팩토링(비지니스 로직과 예외처리)</sub>
@@ -95,7 +95,7 @@
       <td><img align=center src="assets/images/profile/profile-1.jpg" width="100" height="100" alt="프로필 이미지"></td>
       <td width="250px">
         <a href="https://github.com/flow2c">
-          <sub<b><span style='font-size:120%'>김태현</span></b></sub>
+          김태현
         </a>
         <br />
         <sub>토픽 화면 UI 구현<br>발표 자료 제작</sub>
