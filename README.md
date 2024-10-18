@@ -54,6 +54,18 @@
 <br>
 
 ## ⚙️ 사용한 기술 스택
+### Front
+- flutter
+- dart
+
+### Back
+- node.js
+- typescript
+
+### 협업도구
+- Notion
+- Disrod
+- Figma
 
 <br>
 
