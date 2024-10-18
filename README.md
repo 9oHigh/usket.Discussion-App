@@ -61,7 +61,8 @@
 - ### Back
   - node.js
   - typescript
-  - postgresql
+  - postgres
+  - Postman
   <br>
 - ### 협업도구
   - gitlab
