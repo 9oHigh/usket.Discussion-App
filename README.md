@@ -2,6 +2,7 @@
 
 
 <div align=center style="display: flex; justify-content: center; align-items: center;flex-direction: column;">
+<<<<<<< HEAD
     <div>
       <img src='https://img.shields.io/badge/Flutter-02569B?&logo=flutter&logoColor=white'>
       <img src='https://img.shields.io/badge/dart-%230175C2.svg?&logoColor=white'>
@@ -10,6 +11,9 @@
       <img src='https://img.shields.io/badge/Postman-FF6C37?&logoColor=white'>
       <img src='https://img.shields.io/badge/postgres-%23316192.svg?&logoColor=white'>
     </div>
+=======
+    <img src='https://img.shields.io/badge/Flutter-02569B?&logo=flutter&logoColor=white'>
+>>>>>>> 5155df8cbd223ebdf1b2806ffab0f3cc2093ff9a
     <div align="center">
         <img src="https://img.shields.io/badge/-개발 기간-FF7F50?logoColor=white"/>
         <img src="https://img.shields.io/badge/2024.10.2 ~ 2024.10.18-F5F5F5?style=flat&labelColor=FFF5F5"/>
@@ -28,15 +32,20 @@
 <br>
 
 ## 💁 프로젝트 소개
+<<<<<<< HEAD
 <span style='font-size:130%'>"주제별로 특정 시간만 활성화되는 채팅방 기능을 가진 SNS 앱"</span>
 - <span style='font-size:130%'>원하는 채팅방을 예약</span>
 - <span style='font-size:130%'>채팅방이 시작되기 전에 기기 알림을 전송</span>
 - <span style='font-size:130%'>정해진 시간이 지나면 채팅방을 종료</span>
+=======
+<span style='font-size:130%'>"이 프로젝트에 대한 간략한 설명을 작성할 수 있습니다."</span>
+>>>>>>> 5155df8cbd223ebdf1b2806ffab0f3cc2093ff9a
 
 <br>
 
 ## 📱 프로토 타입 
 <div align="center">
+<<<<<<< HEAD
   <img src="assets/images/prototype/00alarm_talk_intro.png" width="200" alt="Image 1" />
   &nbsp;&nbsp;&nbsp;
   <img src="assets/images/prototype/01alarm_talk_home.png" width="200" alt="Image 2" />
@@ -49,6 +58,13 @@
   <img src="assets/images/prototype/04alarm_talk_filter.png" width="200" alt="Image 2" />
   &nbsp;&nbsp;&nbsp;
   <img src="assets/images/prototype/05alarm_talk_create-1.png" width="200" alt="Image 3" />
+=======
+  <img src="/images/intro_screen.png" width="150" alt="Image 1" />
+  &nbsp;&nbsp;&nbsp;
+  <img src="/images/filter_screen.png" width="150" alt="Image 2" />
+  &nbsp;&nbsp;&nbsp;
+  <img src="/images/filter_screen_selected.png" width="150" alt="Image 3" />
+>>>>>>> 5155df8cbd223ebdf1b2806ffab0f3cc2093ff9a
 </div>
 
 <br>
@@ -66,6 +82,7 @@
 <br>
 
 ## 😎 프로젝트 팀원
+<<<<<<< HEAD
   <table>
     <tr>
       <td><img align=center src="assets/images/profile/profile-1.jpg" width="100" height="100" alt="프로필 이미지"></td>
@@ -102,3 +119,33 @@
       </td>
     </tr>
   </table>
+=======
+<div>
+  <table>
+    <tr>
+      <td><img align=center src="/images/profile.jpg" width="100" height="100" alt="프로필 이미지"></td>
+      <td>
+        <a href="https://github.com/flow2c">
+          <sub<b><span style='font-size:120%'>Loti</span></b></sub>
+        </a>
+        <br />
+        <sub>채팅방 생성, 필터 화면 및 기능 구현<br>UI 디자인 및 구현</sub>
+      </td>
+    </tr>
+  </table>
+</div>
+<div>
+  <table>
+    <tr>
+      <td><img align=center src="/images/profile.jpg" width="100" height="100" alt="프로필 이미지"></td>
+      <td>
+        <a href="https://github.com/flow2c">
+          <sub<b><span style='font-size:120%'>Loti</span></b></sub>
+        </a>
+        <br />
+        <sub>채팅방 생성, 필터 화면 및 기능 구현<br>UI 디자인 및 구현</sub>
+      </td>
+    </tr>
+  </table>
+</div>
+>>>>>>> 5155df8cbd223ebdf1b2806ffab0f3cc2093ff9a
