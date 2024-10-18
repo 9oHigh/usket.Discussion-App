@@ -55,8 +55,14 @@
 
 ## ⚙️ 사용한 기술 스택
 - ### Front
-  - flutter
-  - dart
+  <div>
+    <img src="https://github.com/flow2c/readme-template/blob/main/images/skills/Flutter.png?raw=true" width="100" alt="Image 1" />
+  </div>
+  flutter
+  <div>
+    <img src="https://github.com/flow2c/readme-template/blob/main/images/skills/Dart.png?raw=true" width="100" alt="Image 1" />
+  </div>
+  dart
   <br>
 - ### Back
   - node.js
