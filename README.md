@@ -60,7 +60,7 @@
     <img src="https://github.com/flow2c/readme-template/blob/main/images/skills/Dart.png?raw=true" width="70" alt="dart" />
   <br>
 - ### Back
-    <img src="https://github.com/flow2c/readme-template/blob/main/images/skills/NodeJS.png?raw=true" width="70" alt="nodeJS" />
+    <img src="https://github.com/flow2c/readme-template/blob/main/images/skills/NodeJS.png?raw=true" width="70" alt="nodejs" />
     &nbsp;&nbsp;&nbsp;
     <img src="https://github.com/flow2c/readme-template/blob/main/images/skills/TypeScript.png?raw=true" width="70" alt="typeScript" />
     <img src="https://github.com/flow2c/readme-template/blob/main/images/skills/PostgreSQL.png?raw=true" width="70" alt="postgres" />
@@ -68,10 +68,13 @@
     <img src="https://github.com/flow2c/readme-template/blob/main/images/skills/Postman.png?raw=true" width="70" alt="postman" />
   <br>
 - ### 협업도구
-  - gitlab
-  - notion
-  - disrod
-  - figma
+    <img src="https://github.com/flow2c/readme-template/blob/main/images/skills/GitLab.png?raw=true" width="70" alt="gitlab" />
+    &nbsp;&nbsp;&nbsp;
+    <img src="https://github.com/flow2c/readme-template/blob/main/images/skills/Notion.png?raw=true" width="70" alt="notion" />
+    &nbsp;&nbsp;&nbsp;
+    <img src="https://github.com/flow2c/readme-template/blob/main/images/skills/Discord.png?raw=true" width="70" alt="discord" />
+    &nbsp;&nbsp;&nbsp;
+    <img src="https://github.com/flow2c/readme-template/blob/main/images/skills/Figma.png?raw=true" width="70" alt="figma" />
 
 <br>
 
