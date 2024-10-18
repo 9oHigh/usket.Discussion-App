@@ -1,4 +1,4 @@
-![header](https://capsule-render.vercel.app/api?type=waving&color=6684F3&height=280&section=header&text=project%20title&fontSize=80&fontColor=ffffff)
+![header](https://capsule-render.vercel.app/api?type=waving&color=6684F3&height=280&section=header&text=Alarm%20Talk&fontSize=80&fontColor=ffffff)
 
 
 <div align=center style="display: flex; justify-content: center; align-items: center;flex-direction: column;">
@@ -69,7 +69,7 @@
   <table>
     <tr>
       <td><img align=center src="assets/images/profile/profile-1.jpg" width="100" height="100" alt="프로필 이미지"></td>
-      <td>
+      <td width="250px">
         <a href="https://github.com/flow2c">
           <sub<b><span style='font-size:120%'>신가연</span></b></sub>
         </a>
@@ -81,7 +81,7 @@
   <table>
     <tr>
       <td><img align=center src="assets/images/profile/profile-1.jpg" width="100" height="100" alt="프로필 이미지"></td>
-      <td>
+      <td width="250px">
         <a href="https://github.com/flow2c">
           <sub<b><span style='font-size:120%'>이경후</span></b></sub>
         </a>
@@ -93,7 +93,7 @@
     <table>
     <tr>
       <td><img align=center src="assets/images/profile/profile-1.jpg" width="100" height="100" alt="프로필 이미지"></td>
-      <td>
+      <td width="250px">
         <a href="https://github.com/flow2c">
           <sub<b><span style='font-size:120%'>김태현</span></b></sub>
         </a>
