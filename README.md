@@ -11,7 +11,7 @@
       <img src='https://img.shields.io/badge/postgres-%23316192.svg?&logoColor=white'>
     </div>
     <div align="center">
-        <img src="https://img.shields.io/badge/-개발 기간-FF7F50?logoColor=white"/>
+        <img src="https://img.shields.io/badge/-개발 기간-000000?logoColor=white"/>
         <img src="https://img.shields.io/badge/2024.10.2 ~ 2024.10.18-F5F5F5?style=flat&labelColor=FFF5F5"/>
     </div>
 </div>
