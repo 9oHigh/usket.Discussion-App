@@ -69,36 +69,36 @@
   <table>
     <tr>
       <td><img align=center src="assets/images/profile/profile-1.jpg" width="100" height="100" alt="프로필 이미지"></td>
-      <td width="250px">
+      <td width="300px">
         <a href="https://github.com/flow2c">
           신가연
         </a>
         <br />
-        <sub>채팅방 생성 화면과 기능, 필터 화면 및 기능<br>채팅방 알림 예약, 취소<br>UI 디자인 및 구현</sub>
+        채팅방 생성 화면과 기능, 필터 화면 및 기능<br>채팅방 알림 예약, 취소<br>UI 디자인 및 구현
       </td>
     </tr>
   </table>
   <table>
     <tr>
       <td><img align=center src="assets/images/profile/profile-1.jpg" width="100" height="100" alt="프로필 이미지"></td>
-      <td width="250px">
+      <td width="300px">
         <a href="https://github.com/flow2c">
           이경후
         </a>
         <br />
-        <sub>홈 화면과 기능<br>채팅 화면과 기능<br>라우터 적용<br>리팩토링(비지니스 로직과 예외처리)</sub>
+        홈 화면과 기능<br>채팅 화면과 기능<br>라우터 적용<br>리팩토링(비지니스 로직과 예외처리)
       </td>
     </tr>
   </table>
     <table>
     <tr>
       <td><img align=center src="assets/images/profile/profile-1.jpg" width="100" height="100" alt="프로필 이미지"></td>
-      <td width="250px">
+      <td width="300px">
         <a href="https://github.com/flow2c">
           김태현
         </a>
         <br />
-        <sub>토픽 화면 UI 구현<br>발표 자료 제작</sub>
+        토픽 화면 UI 구현<br>발표 자료 제작
       </td>
     </tr>
   </table>
