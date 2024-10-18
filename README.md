@@ -60,10 +60,12 @@
     <img src="https://github.com/flow2c/readme-template/blob/main/images/skills/Dart.png?raw=true" width="70" alt="dart" />
   <br>
 - ### Back
-  - node.js
-  - typescript
-  - postgres
-  - Postman
+    <img src="https://github.com/flow2c/readme-template/blob/main/images/skills/NodeJS.png?raw=true" width="70" alt="nodeJS" />
+    &nbsp;&nbsp;&nbsp;
+    <img src="https://github.com/flow2c/readme-template/blob/main/images/skills/TypeScript.png?raw=true" width="70" alt="typeScript" />
+    <img src="https://github.com/flow2c/readme-template/blob/main/images/skills/PostgreSQL.png?raw=true" width="70" alt="postgres" />
+    &nbsp;&nbsp;&nbsp;
+    <img src="https://github.com/flow2c/readme-template/blob/main/images/skills/Postman.png?raw=true" width="70" alt="postman" />
   <br>
 - ### 협업도구
   - gitlab
