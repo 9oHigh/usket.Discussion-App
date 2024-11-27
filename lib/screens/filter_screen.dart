@@ -2,16 +2,16 @@ import 'package:app_team1/manager/toast_manager.dart';
 import 'package:app_team1/manager/topic_manager.dart';
 import 'package:app_team1/model/topic/topic_count.dart';
 import 'package:app_team1/model/topic/topic_item.dart';
-import 'package:app_team1/widgets/custom/widget/app_bar.dart';
+import 'package:app_team1/screens/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
-import '../../model/topic/topic.dart';
-import '../../services/api_service.dart';
-import '../custom/style/shadow_style.dart';
-import '../utils/app_color.dart';
-import '../utils/app_constant.dart';
-import '../utils/app_font_size.dart';
+import '../model/topic/topic.dart';
+import '../services/api_service.dart';
+import 'styles/shadow_style.dart';
+import '../core/app_color.dart';
+import '../core/app_constant.dart';
+import '../core/app_font_size.dart';
 import '../utils/topic_mapped.dart';
 
 class FilterScreen extends StatefulWidget {

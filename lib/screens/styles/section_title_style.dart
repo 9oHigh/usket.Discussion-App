@@ -1,4 +1,4 @@
-import 'package:app_team1/widgets/utils/app_color.dart';
+import 'package:app_team1/core/app_color.dart';
 import 'package:flutter/material.dart';
 
 class SectionTitleStyle {

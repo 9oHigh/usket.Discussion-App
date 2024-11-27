@@ -1,9 +1,9 @@
-import 'package:app_team1/widgets/page/home_page.dart';
-import 'package:app_team1/widgets/screen/chat_screen.dart';
+import 'package:app_team1/screens/home_page.dart';
+import 'package:app_team1/screens/chat_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
-import 'widgets/screen/create_room_screen.dart';
-import 'widgets/screen/filter_screen.dart';
+import 'screens/create_room_screen.dart';
+import 'screens/filter_screen.dart';
 
 const HomePage homePage = HomePage();
 

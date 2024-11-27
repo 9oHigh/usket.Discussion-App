@@ -6,16 +6,16 @@ import 'package:app_team1/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../model/room.dart';
+import '../model/room.dart';
 import 'package:app_team1/model/topic/topic.dart';
-import '../custom/style/shadow_style.dart';
-import '../utils/app_color.dart';
-import '../utils/app_constant.dart';
-import '../utils/app_font_size.dart';
+import 'styles/shadow_style.dart';
+import '../core/app_color.dart';
+import '../core/app_constant.dart';
+import '../core/app_font_size.dart';
 import '../utils/mixin/infinite_scroll_mixin.dart';
 import 'package:intl/intl.dart';
-import '../custom/widget/app_bar.dart';
-import '../../gen/fonts.gen.dart';
+import 'widgets/app_bar.dart';
+import '../gen/fonts.gen.dart';
 import '../utils/topic_mapped.dart';
 
 class FavoriteScreen extends StatefulWidget {

@@ -1,10 +1,10 @@
-import 'package:app_team1/widgets/custom/style/shadow_style.dart';
-import 'package:app_team1/widgets/utils/app_color.dart';
+import 'package:app_team1/screens/styles/shadow_style.dart';
+import 'package:app_team1/core/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:app_team1/manager/socket_manager.dart';
 import 'dart:async';
 import 'package:go_router/go_router.dart';
-import '../custom/widget/app_bar.dart';
+import 'widgets/app_bar.dart';
 
 class ChatScreen extends StatefulWidget {
   final String _roomId;

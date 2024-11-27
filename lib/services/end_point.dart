@@ -26,7 +26,7 @@ extension EndPointExtension on EndPoint {
       case EndPoint.deleteRoom:
         return '/room/delete';
       default:
-        return '';
+        return '/';
     }
   }
 }

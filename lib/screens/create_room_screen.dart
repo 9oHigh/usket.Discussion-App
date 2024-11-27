@@ -1,18 +1,18 @@
 import 'package:app_team1/manager/notification_manager.dart';
 import 'package:app_team1/manager/toast_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../services/api_service.dart';
+import '../services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../model/topic/topic.dart';
+import '../model/topic/topic.dart';
 import 'package:go_router/go_router.dart';
-import '../custom/style/section_title_style.dart';
-import '../custom/style/shadow_style.dart';
-import '../custom/widget/app_bar.dart';
-import '../custom/widget/time_picker.dart';
-import '../utils/app_color.dart';
-import '../utils/app_constant.dart';
-import '../utils/app_font_size.dart';
+import 'styles/section_title_style.dart';
+import 'styles/shadow_style.dart';
+import 'widgets/app_bar.dart';
+import 'widgets/time_picker.dart';
+import '../core/app_color.dart';
+import '../core/app_constant.dart';
+import '../core/app_font_size.dart';
 import '../utils/topic_mapped.dart';
 
 enum CreateError {

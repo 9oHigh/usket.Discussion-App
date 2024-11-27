@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../model/player.dart';
-import 'end_point/end_point.dart';
+import 'end_point.dart';
 
 class ApiService {
   // Emulator - 10.0.2.2:3000

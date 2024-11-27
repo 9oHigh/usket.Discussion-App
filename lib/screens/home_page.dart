@@ -1,9 +1,9 @@
-import 'package:app_team1/widgets/screen/favorite_screen.dart';
-import 'package:app_team1/widgets/screen/home_screen.dart';
-import 'package:app_team1/widgets/utils/app_color.dart';
+import 'package:app_team1/screens/favorite_screen.dart';
+import 'package:app_team1/screens/home_screen.dart';
+import 'package:app_team1/core/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../gen/assets.gen.dart';
+import '../gen/assets.gen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
