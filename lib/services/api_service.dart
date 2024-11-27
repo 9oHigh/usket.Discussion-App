@@ -18,7 +18,7 @@ class ApiService {
     final response =
         await http.get(Uri.parse("$_baseUrl${EndPoint.topicRoomCount.url}"));
 
-    if (response.statusCode == 200) {
+    if (200 <= response.statusCode && response.statusCode <= 299) {
       final List<dynamic> data = json.decode(response.body);
       final List<TopicCount> topicCounts =
           data.map((json) => TopicCount.fromJson(json)).toList();
